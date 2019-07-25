@@ -25,7 +25,9 @@ func V1GetOrder(context echo.Context) error {
 		First(&order).RecordNotFound() {
 		return utils.BuildError("1020")
 	}
-	return context.JSON(http.StatusOK, order)
+	response := utils.SuccessResponse
+	response.Body = order
+	return context.JSON(http.StatusOK, response)
 }
 
 func V1GetOrders(context echo.Context) error {
@@ -68,20 +70,25 @@ func V1GetOrders(context echo.Context) error {
 		orderParam = "id ASC"
 	}
 	var orders []Order
+	var count int
 	if day == "" {
+		mainDB.Model(&Order{}).Where("market_id = ? AND user_id = ? AND state = ? ", market.Id, user.Id, state).Count(&count)
 		if mainDB.Order(orderParam).
 			Where("market_id = ? AND user_id = ? AND state = ? ", market.Id, user.Id, state).
 			Offset(limit * (page - 1)).Limit(limit).Find(&orders).RecordNotFound() {
 			return utils.BuildError("1020")
 		}
 	} else {
+		mainDB.Model(&Order{}).Where("market_id = ? AND user_id = ? AND state = ? AND date(created_at) = ?", market.Id, user.Id, state, day).Count(&count)
 		if mainDB.Order(orderParam).
 			Where("market_id = ? AND user_id = ? AND state = ? AND date(created_at) = ?", market.Id, user.Id, state, day).
 			Offset(limit * (page - 1)).Limit(limit).Find(&orders).RecordNotFound() {
 			return utils.BuildError("1020")
 		}
 	}
-	return context.JSON(http.StatusOK, orders)
+	response := utils.ArrayResponse
+	response.Init(orders, page, count, limit)
+	return context.JSON(http.StatusOK, response)
 }
 
 func V1PostOrders(context echo.Context) error {
@@ -132,15 +139,18 @@ func V1PostOrders(context echo.Context) error {
 		Locked:       locked,
 		OriginLocked: locked,
 	}
+	response := utils.SuccessResponse
 	err := tryToChangeAccount(context, &order, &market, side, user.Id, 9)
 	if err == nil {
 		pushMessageToMatching(&order, &market, "submit")
 		response := utils.SuccessResponse
 		response.Body = order
-		return context.JSON(http.StatusOK, response)
 	} else {
-		return err
+		response = utils.BuildError("3022")
+		response.Body = order
 	}
+	return context.JSON(http.StatusOK, response)
+
 }
 
 type OrderAttr struct {
@@ -163,6 +173,9 @@ func V1PostOrdersMulti(context echo.Context) error {
 	var orderAttrs []OrderAttr
 	json.Unmarshal([]byte(strings.Replace(params["orders"], `\"`, `"`, -1)), &orderAttrs)
 	orders := make([]interface{}, len(orderAttrs))
+
+	response := utils.SuccessResponse
+
 	for i, orderAttr := range orderAttrs {
 		var orderType string
 		locked := orderAttr.Volume
@@ -198,12 +211,13 @@ func V1PostOrdersMulti(context echo.Context) error {
 		if err == nil {
 			pushMessageToMatching(&order, &market, "submit")
 			orders[i] = order
+			response.Body = orders
 		} else {
-			orders[i] = nil
+			response = utils.BuildError("3022")
+			response.Body = orders
 		}
-
 	}
-	return context.JSON(http.StatusOK, orders)
+	return context.JSON(http.StatusOK, response)
 }
 
 func V1PostOrderDelete(context echo.Context) error {
@@ -216,7 +230,9 @@ func V1PostOrderDelete(context echo.Context) error {
 		return utils.BuildError("2004")
 	}
 	pushMessageToMatching(&order, &order.Market, "cancel")
-	return context.JSON(http.StatusOK, order)
+	response := utils.SuccessResponse
+	response.Body = order
+	return context.JSON(http.StatusOK, response)
 }
 
 func V1PostOrdersDelete(context echo.Context) error {
@@ -234,7 +250,9 @@ func V1PostOrdersDelete(context echo.Context) error {
 			pushMessageToMatching(&order, &order.Market, "cancel")
 		}
 	}
-	return context.JSON(http.StatusOK, orders)
+	response := utils.SuccessResponse
+	response.Body = orders
+	return context.JSON(http.StatusOK, response)
 }
 
 func V1PostOrdersClear(context echo.Context) error {
@@ -258,7 +276,9 @@ func V1PostOrdersClear(context echo.Context) error {
 			pushMessageToMatching(&order, &market, "cancel")
 		}
 	}
-	return context.JSON(http.StatusOK, orders)
+	response := utils.SuccessResponse
+	response.Body = orders
+	return context.JSON(http.StatusOK, response)
 }
 
 func pushMessageToMatching(order *Order, market *Market, option string) {

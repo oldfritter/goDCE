@@ -40,7 +40,9 @@ func V1GetTrades(context echo.Context) error {
 	for i := 0; i < limit && i < len(all); i++ {
 		result = append(result, all[i])
 	}
-	return context.JSON(http.StatusOK, result)
+	response := utils.SuccessResponse
+	response.Body = result
+	return context.JSON(http.StatusOK, response)
 }
 
 func V1GetTradesMy(context echo.Context) error {

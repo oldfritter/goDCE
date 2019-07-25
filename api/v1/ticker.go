@@ -18,16 +18,18 @@ func V1GetTickers(context echo.Context) error {
 	tickerRedis := utils.GetRedisConn("ticker")
 	defer tickerRedis.Close()
 
-	var Tickers []Ticker
+	var tickers []Ticker
 	for _, market := range markets {
 		if !market.Visible {
 			continue
 		}
 		var tickerStruct Ticker
 		buildTickerWithMarket(&tickerStruct, &market, tickerRedis)
-		Tickers = append(Tickers, tickerStruct)
+		tickers = append(tickers, tickerStruct)
 	}
-	return context.JSON(http.StatusOK, Tickers)
+	response := utils.SuccessResponse
+	response.Body = tickers
+	return context.JSON(http.StatusOK, response)
 }
 
 func V1GetTickersMarket(context echo.Context) error {
@@ -43,7 +45,9 @@ func V1GetTickersMarket(context echo.Context) error {
 	}
 	var tickerStruct Ticker
 	buildTickerWithMarket(&tickerStruct, &market, tickerRedis)
-	return context.JSON(http.StatusOK, tickerStruct)
+	response := utils.SuccessResponse
+	response.Body = tickerStruct
+	return context.JSON(http.StatusOK, response)
 }
 
 func buildTickerWithMarket(tickerStruct *Ticker, market *Market, tickerRedis redis.Conn) {

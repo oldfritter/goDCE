@@ -4,6 +4,8 @@
   error_code:
     '3020': No record can be found.
     '3021': 暂不开放用户注册。
+    '3022': 下单失败。
+    '3023': 部分下单失败。
 
     '3025': No this interface.
     '3026': No data can be found.

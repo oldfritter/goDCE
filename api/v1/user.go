@@ -11,7 +11,9 @@ import (
 )
 
 func V1GetUsersMe(context echo.Context) error {
-	return context.JSON(http.StatusOK, context.Get("current_user"))
+	response := utils.SuccessResponse
+	response.Body = context.Get("current_user")
+	return context.JSON(http.StatusOK, response)
 }
 
 func V1GetUsersAccounts(context echo.Context) error {
