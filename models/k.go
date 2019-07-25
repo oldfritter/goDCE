@@ -30,5 +30,5 @@ func (k *KLine) Data() (data [5]string) {
 }
 
 func (k *KLine) RedisKey() string {
-	return fmt.Sprintln("goHex:k:%v:%v", k.MarketId, k.Period)
+	return fmt.Sprintln("goDCE:k:%v:%v", k.MarketId, k.Period)
 }

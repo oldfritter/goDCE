@@ -51,5 +51,5 @@ func (ticker *TickerAspect) Add(attrs []interface{}) {
 }
 
 func (ticker *Ticker) RedisKey() string {
-	return fmt.Sprintf("goHex:ticker:%v", ticker.Code)
+	return fmt.Sprintf("goDCE:ticker:%v", ticker.Code)
 }

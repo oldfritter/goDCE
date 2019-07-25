@@ -1,6 +1,6 @@
 production:
   main:
-    database: goHex
+    database: goDCE
     username: root
     password: 
     host: 127.0.0.1
@@ -8,7 +8,7 @@ production:
     dbargs: charset=utf8&parseTime=True&loc=Local
     pool: 5
   backup:
-    database: goHex_backup
+    database: goDCE_backup
     username: root
     password: 
     host: 127.0.0.1
@@ -18,7 +18,7 @@ production:
 
 development:
   main:
-    database: goHex
+    database: goDCE
     username: root
     password: 
     host: 127.0.0.1
@@ -26,7 +26,7 @@ development:
     dbargs: charset=utf8&parseTime=True&loc=Local
     pool: 5
   backup:
-    database: goHex_backup
+    database: goDCE_backup
     username: root
     password: 
     host: 127.0.0.1

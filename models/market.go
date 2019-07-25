@@ -65,11 +65,6 @@ func (assignment *Market) OrderCancelQueue() string {
 	return assignment.OrderCancelExchange() + "." + assignment.Code
 }
 
-// reload Queue
-func (assignment *Market) OrderCancelReloadQueue() string {
-	return utils.AmqpGlobalConfig.Queue.Cancel["reload"]
-}
-
 // LogFilePath
 func (assignment *Market) MatchingLogFilePath() string {
 	return "logs/matching-" + assignment.Code + ".log"
@@ -82,18 +77,18 @@ func (assignment *Market) OrderCancelLogFilePath() string {
 }
 
 func (market *Market) LatestTradesRedisKey() string {
-	return fmt.Sprintf("goHex:latestTrades:%v", market.Code)
+	return fmt.Sprintf("goDCE:latestTrades:%v", market.Code)
 }
 func (market *Market) TickerRedisKey() string {
-	return "goHex:ticker:" + market.Code
+	return "goDCE:ticker:" + market.Code
 }
 func (market *Market) KLineRedisKey(period string) string {
-	return fmt.Sprintf("goHex:k:%v:%v", market.Id, period)
+	return fmt.Sprintf("goDCE:k:%v:%v", market.Id, period)
 }
 
 func (market *Market) AskRedisKey() string {
-	return fmt.Sprintf("goHex:depth:%v:ask", market.Id)
+	return fmt.Sprintf("goDCE:depth:%v:ask", market.Id)
 }
 func (market *Market) BidRedisKey() string {
-	return fmt.Sprintf("goHex:depth:%v:bid", market.Id)
+	return fmt.Sprintf("goDCE:depth:%v:bid", market.Id)
 }

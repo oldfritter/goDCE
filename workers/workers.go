@@ -54,9 +54,9 @@ func initWorkers() {
 func StartAllWorkers() {
 	for _, w := range sneakerWorkers.AllWorkers {
 		for i := 0; i < w.Threads; i++ {
-			go func() {
+			go func(w sneakerWorkers.Worker) {
 				w.SubscribeMessageByQueue(amqp.Table{})
-			}()
+			}(w)
 		}
 	}
 }

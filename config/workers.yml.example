@@ -1,16 +1,16 @@
 ---
 - name: KLineWorker
-  exchange: goHex.default
-  routing_key: goHex.k
-  queue: goHex.k
+  exchange: goDCE.default
+  routing_key: goDCE.k
+  queue: goDCE.k
   durable: true
   ack: true
   threads: 4
 
 - name: TickerWorker
-  exchange: goHex.default
-  routing_key: goHex.ticker
-  queue: goHex.ticker
+  exchange: goDCE.default
+  routing_key: goDCE.ticker
+  queue: goDCE.ticker
   durable: true
   ack: true
   threads: 4

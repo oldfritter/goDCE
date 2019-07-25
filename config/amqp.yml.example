@@ -7,22 +7,22 @@ connect:
 
 exchange:
   default:
-    key: goHex.default
+    key: goDCE.default
     type: direct
   matching:
-    key: goHex.trade.matching
+    key: goDCE.trade.matching
     type: direct
   trade:
-    key: goHex.trade
+    key: goDCE.trade
     type: direct
   cancel:
-    key: goHex.order.cancel
+    key: goDCE.order.cancel
     type: direct
 
 queue:
   matching:
-    reload: goHex.trade.matching.reload
+    reload: goDCE.trade.matching.reload
   trade:
-    reload: goHex.trade.reload
+    reload: goDCE.trade.reload
   cancel:
-    reload: goHex.order.cancel.reload
+    reload: goDCE.order.cancel.reload

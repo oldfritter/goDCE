@@ -20,7 +20,7 @@ func InitAssignments() {
 	mainDB := utils.MainDbBegin()
 	defer mainDB.DbRollback()
 	var markets []Market
-	mainDB.Where("order_cancel_node = ?", envConfig.CurrentEnv.OrderCancel.Node).Find(&markets)
+	mainDB.Where("order_cancel_node = ?", envConfig.CurrentEnv.Node).Find(&markets)
 	for _, market := range markets {
 		market.Running = Assignments[market.Id].Running
 		if market.MatchingAble && !market.Running {
@@ -98,7 +98,7 @@ func SubscribeReload() (err error) {
 		fmt.Errorf("Channel: %s", err)
 		return
 	}
-	channel.ExchangeDeclare(utils.AmqpGlobalConfig.Exchange.Default["key"], "topic", false, false, false, false, nil)
+	channel.ExchangeDeclare(utils.AmqpGlobalConfig.Exchange.Default["key"], "topic", true, false, false, false, nil)
 	channel.QueueBind(utils.AmqpGlobalConfig.Queue.Cancel["reload"], utils.AmqpGlobalConfig.Queue.Cancel["reload"], utils.AmqpGlobalConfig.Exchange.Default["key"], false, nil)
 	return
 }
