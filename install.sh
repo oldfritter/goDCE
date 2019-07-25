@@ -10,6 +10,7 @@ cp -r config/workers.yml.example config/workers.yml
 mkdir bin
 mkdir pids
 mkdir logs
+mkdir -p public/assets
 
 rm -rf vendor
 rm -rf Godeps

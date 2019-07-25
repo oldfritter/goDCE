@@ -182,7 +182,7 @@ func V1PostOrdersMulti(context echo.Context) error {
 			return utils.BuildError("1022")
 		}
 		order := Order{
-			Source:       "APIv1",
+			Source:       context.Param("platform") + "-APIv1",
 			State:        100,
 			UserId:       user.Id,
 			MarketId:     market.Id,
@@ -319,7 +319,6 @@ func tryToChangeAccount(context echo.Context, order *Order, market *Market, side
 			return tryToChangeAccount(context, order, market, side, user_id, times-1)
 		}
 	}
-
 	err := account.LockFunds(mainDB, (*order).Locked, ORDER_SUBMIT, (*order).Id, "Order")
 	if err == nil {
 		mainDB.DbCommit()

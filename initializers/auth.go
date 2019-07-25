@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
-	"regexp"
 	"time"
 
 	"github.com/labstack/echo"
@@ -77,7 +76,6 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 		if context.Request().Header.Get("Authorization") == "" {
 			return utils.BuildError("4001")
 		}
-		// check_timestamp
 		if currentApiInterface.CheckTimestamp && checkTimestamp(context, &params) == false {
 			return utils.BuildError("3050")
 		}
@@ -85,23 +83,19 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 		db := utils.MainDbBegin()
 		defer db.DbRollback()
 
-		robotMatched, _ := regexp.MatchString("/api/robot/.*", currentApiInterface.Path)
-		mobileMatched, _ := regexp.MatchString("/api/mobile/.*", currentApiInterface.Path)
-		webMatched, _ := regexp.MatchString("/api/web/.*", currentApiInterface.Path)
 		var user User
 		var token Token
 		var apiToken ApiToken
 		var device Device
 		var err error
-		if robotMatched {
+		if context.Param("platform") == "client" {
 			user, apiToken, err = robotAuth(context, &params, db)
-			// check_sign
 			if currentApiInterface.Sign && checkSign(context, apiToken.SecretKey, &params) == false {
 				return utils.BuildError("4005")
 			}
-		} else if mobileMatched {
+		} else if context.Param("platform") == "mobile" {
 			user, device, err = mobileAuth(context, &params, db)
-		} else if webMatched {
+		} else if context.Param("platform") == "web" {
 			user, token, err = webAuth(context, &params, db)
 		}
 		if err != nil {

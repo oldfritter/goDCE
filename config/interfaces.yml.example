@@ -5,214 +5,72 @@
   method: GET
 
 # V1 --------------------------------------------------------------------------------------------------------------------------------------------------
-# robot
-- path: /api/robot/v1/currencies
+- path: /api/:platform/v1/currencies
   method: GET
 
-- path: /api/robot/v1/k
+- path: /api/:platform/v1/k
   method: GET
-- path: /api/robot/v1/chart
-  method: GET
-
-- path: /api/robot/v1/markets
+- path: /api/:platform/v1/chart
   method: GET
 
-- path: /api/robot/v1/users/login
+- path: /api/:platform/v1/markets
+  method: GET
+
+- path: /api/:platform/v1/users/login
   method: POST
-- path: /api/robot/v1/users/me
+- path: /api/:platform/v1/users/me
   auth: true
   method: GET
-- path: /api/robot/v1/users/accounts/:currency
+- path: /api/:platform/v1/users/accounts/:currency
   auth: true
   method: POST
-- path: /api/robot/v1/users/accounts
+- path: /api/:platform/v1/users/accounts
   auth: true
   sign: true
   method: GET
 
-- path: /api/robot/v1/depth
+- path: /api/:platform/v1/depth
   method: GET
 
-- path: /api/robot/v1/order
+- path: /api/:platform/v1/order
   auth: true
   method: GET
-- path: /api/robot/v1/orders
+- path: /api/:platform/v1/orders
   auth: true
   method: GET
-- path: /api/robot/v1/orders
-  auth: true
-  sign: true
-  method: POST
-  reloading_matching_check: true
-  market_can_trade: true
-- path: /api/robot/v1/orders/multi2
-  method: POST
-  auth: true
-  sign: true
-  reloading_matching_check: true
-  market_can_trade: true
-- path: /api/robot/v1/order/delete
-  auth: true
-  sign: true
-  method: POST
-- path: /api/robot/v1/orders/delete
-  auth: true
-  sign: true
-  method: POST
-- path: /api/robot/v1/orders/clear
-  auth: true
-  sign: true
-  method: POST
-
-- path: /api/robot/v1/tickers
-  method: GET
-- path: /api/robot/v1/tickers/:market
-  method: GET
-
-- path: /api/robot/v1/trades
-  method: GET
-- path: /api/robot/v1/trades/my
-  auth: true
-  method: GET
-
-#  --------------------------------------------------------------------------------------------------------------------------------------------------
-# mobile
-- path: /api/mobile/v1/currencies
-  method: GET
-
-- path: /api/mobile/v1/k
-  method: GET
-- path: /api/mobile/v1/chart
-  method: GET
-
-- path: /api/mobile/v1/markets
-  method: GET
-
-- path: /api/mobile/v1/users/login
-  method: POST
-- path: /api/mobile/v1/users/me
-  auth: true
-  method: GET
-- path: /api/mobile/v1/users/accounts/:currency
-  auth: true
-  method: POST
-- path: /api/mobile/v1/users/accounts
-  auth: true
-  sign: true
-  method: GET
-
-- path: /api/mobile/v1/depth
-  method: GET
-
-- path: /api/mobile/v1/order
-  auth: true
-  method: GET
-- path: /api/mobile/v1/orders
-  auth: true
-  method: GET
-- path: /api/mobile/v1/orders
+- path: /api/:platform/v1/orders
   auth: true
   sign: true
   method: POST
   reloading_matching_check: true
   market_can_trade: true
-- path: /api/mobile/v1/orders/multi2
+- path: /api/:platform/v1/orders/multi2
   method: POST
   auth: true
   sign: true
   reloading_matching_check: true
   market_can_trade: true
-- path: /api/mobile/v1/order/delete
+- path: /api/:platform/v1/order/delete
   auth: true
   sign: true
   method: POST
-- path: /api/mobile/v1/orders/delete
+- path: /api/:platform/v1/orders/delete
   auth: true
   sign: true
   method: POST
-- path: /api/mobile/v1/orders/clear
-  auth: true
-  sign: true
-  method: POST
-
-- path: /api/mobile/v1/tickers
-  method: GET
-- path: /api/mobile/v1/tickers/:market
-  method: GET
-
-- path: /api/mobile/v1/trades
-  method: GET
-- path: /api/mobile/v1/trades/my
-  auth: true
-  method: GET
-
-#  --------------------------------------------------------------------------------------------------------------------------------------------------
-# web
-- path: /api/web/v1/currencies
-  method: GET
-
-- path: /api/web/v1/k
-  method: GET
-- path: /api/web/v1/chart
-  method: GET
-
-- path: /api/web/v1/markets
-  method: GET
-
-- path: /api/web/v1/users/login
-  method: POST
-- path: /api/web/v1/users/me
-  auth: true
-  method: GET
-- path: /api/web/v1/users/accounts/:currency
-  auth: true
-  method: POST
-- path: /api/web/v1/users/accounts
-  auth: true
-  sign: true
-  method: GET
-
-- path: /api/web/v1/depth
-  method: GET
-
-- path: /api/web/v1/order
-  auth: true
-  method: GET
-- path: /api/web/v1/orders
-  auth: true
-  method: GET
-- path: /api/web/v1/orders
-  auth: true
-  sign: true
-  method: POST
-  reloading_matching_check: true
-  market_can_trade: true
-- path: /api/web/v1/orders/multi2
-  method: POST
-  auth: true
-  sign: true
-  reloading_matching_check: true
-  market_can_trade: true
-- path: /api/web/v1/order/delete
-  auth: true
-  sign: true
-  method: POST
-- path: /api/web/v1/orders/delete
-  auth: true
-  sign: true
-  method: POST
-- path: /api/web/v1/orders/clear
+- path: /api/:platform/v1/orders/clear
   auth: true
   sign: true
   method: POST
 
-- path: /api/web/v1/tickers
+- path: /api/:platform/v1/tickers
   method: GET
-- path: /api/web/v1/tickers/:market
+- path: /api/:platform/v1/tickers/:market
   method: GET
 
-- path: /api/web/v1/trades
+- path: /api/:platform/v1/trades
   method: GET
-- path: /api/web/v1/trades/my
+- path: /api/:platform/v1/trades/my
   auth: true
   method: GET
+
