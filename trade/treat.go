@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	envConfig "github.com/oldfritter/goDCE/config"
-	"github.com/oldfritter/goDCE/trade/tradeTreat"
+	"github.com/oldfritter/goDCE/trade/treat"
 	"github.com/oldfritter/goDCE/utils"
 )
 
@@ -28,7 +28,7 @@ func initialize() {
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
 
-	err := ioutil.WriteFile("pids/trade.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
+	err := ioutil.WriteFile("pids/treat.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -41,8 +41,8 @@ func closeResource() {
 }
 
 func initAssignments() {
-	tradeTreat.InitAssignments()
-	tradeTreat.SubscribeReload()
+	treat.InitAssignments()
+	treat.SubscribeReload()
 
 	go func() {
 		channel, err := utils.RabbitMqConnect.Channel()
@@ -56,7 +56,7 @@ func initAssignments() {
 		}
 		msgs, err := channel.Consume(queue.Name, "", false, false, false, false, nil)
 		for _ = range msgs {
-			tradeTreat.InitAssignments()
+			treat.InitAssignments()
 		}
 		return
 	}()

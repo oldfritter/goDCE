@@ -1,4 +1,4 @@
-package tradeTreat
+package treat
 
 import (
 	"encoding/json"

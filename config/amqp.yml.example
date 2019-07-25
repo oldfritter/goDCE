@@ -13,7 +13,7 @@ exchange:
     key: goDCE.trade.matching
     type: direct
   trade:
-    key: goDCE.trade
+    key: goDCE.trade.treat
     type: direct
   cancel:
     key: goDCE.order.cancel
@@ -21,8 +21,8 @@ exchange:
 
 queue:
   matching:
-    reload: goDCE.trade.matching.reload
+    reload: goDCE.reload.trade.matching
   trade:
-    reload: goDCE.trade.reload
+    reload: goDCE.reload.trade.treat
   cancel:
-    reload: goDCE.order.cancel.reload
+    reload: goDCE.reload.order.cancel

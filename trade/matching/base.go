@@ -1,4 +1,4 @@
-package tradeMatching
+package matching
 
 import (
 	"encoding/json"

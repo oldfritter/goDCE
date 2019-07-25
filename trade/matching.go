@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	envConfig "github.com/oldfritter/goDCE/config"
-	"github.com/oldfritter/goDCE/trade/tradeMatching"
+	"github.com/oldfritter/goDCE/trade/matching"
 	"github.com/oldfritter/goDCE/utils"
 )
 
@@ -41,8 +41,8 @@ func closeResource() {
 }
 
 func initAssignments() {
-	tradeMatching.InitAssignments()
-	tradeMatching.SubscribeReload()
+	matching.InitAssignments()
+	matching.SubscribeReload()
 
 	go func() {
 		channel, err := utils.RabbitMqConnect.Channel()
@@ -56,7 +56,7 @@ func initAssignments() {
 		}
 		msgs, err := channel.Consume(queue.Name, "", false, false, false, false, nil)
 		for _ = range msgs {
-			tradeMatching.InitAssignments()
+			matching.InitAssignments()
 		}
 		return
 	}()
