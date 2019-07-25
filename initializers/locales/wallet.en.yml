@@ -1,0 +1,5 @@
+en:
+  wallet:
+    email_code_verified: 邮件验证码
+    app_reset_password: 重置密码鉴权
+    set_fund_password: 设置资金密码鉴权

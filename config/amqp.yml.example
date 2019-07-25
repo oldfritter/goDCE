@@ -1,0 +1,28 @@
+connect:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+  vhost: /
+
+exchange:
+  default:
+    key: goHex.default
+    type: direct
+  matching:
+    key: goHex.trade.matching
+    type: direct
+  trade:
+    key: goHex.trade
+    type: direct
+  cancel:
+    key: goHex.order.cancel
+    type: direct
+
+queue:
+  matching:
+    reload: goHex.trade.matching.reload
+  trade:
+    reload: goHex.trade.reload
+  cancel:
+    reload: goHex.order.cancel.reload

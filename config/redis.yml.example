@@ -1,0 +1,20 @@
+matching:
+  server: 127.0.0.1:6379
+  db: 0
+  pool: 5
+data:
+  server: 127.0.0.1:6379
+  db: 3
+  pool: 5
+k:
+  server: 127.0.0.1:6379
+  db: 1
+  pool: 5
+ticker:
+  server: 127.0.0.1:6379
+  db: 3
+  pool: 5
+limit:
+  server: 127.0.0.1:6379
+  db: 4
+  pool: 5

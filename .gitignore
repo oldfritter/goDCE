@@ -1,0 +1,11 @@
+bin/*
+config/*.yml
+pems/*.pem
+logs/*
+vendor/
+Godeps/
+pids/
+public/web_assets/*
+test*.go
+docker/*
+.idea/

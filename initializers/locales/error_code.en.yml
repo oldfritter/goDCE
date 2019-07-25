@@ -1,0 +1,75 @@
+'en':
+  success_code:
+    '1000': Success.
+  error_code:
+    '3020': No record can be found.
+    '3021': 暂不开放用户注册。
+
+    '3025': No this interface.
+    '3026': No data can be found.
+    '3027': No currency can be found.
+    '3028': 数量错误。
+    '3029': 币种错误。
+    '3030': Need parameter name.
+    '3031': Need parameter email.
+    '3032': Need parameter password.
+    '3033': Need parameter password confirmation.
+
+    '3035': Email was Wrong.
+    '3036': Email code was wrong.
+    '3037': No app can be found.
+    '3038': Failed to create transfer.
+    '3039': No transfer can be found.
+    '3040': No this email code.
+    '3041': No enough coin.
+    '3042': 请刷新页面重试。
+    '3043': The interface call is too frequent, please try again later.
+    '3044': Failed at test.
+    '3045': Transfer already exist。
+    '3046': Transfer amount is too less.
+    '3047': No right.
+    '3048': 此app不支持资产划拨。
+    '3049': 该转账不存在。
+    '3050': Initiation time exception.
+
+    '3054': 重复的转账。
+    '3055': 已绑定手机号。
+
+    '4001': Authorization failed.
+
+    '4005': Signature is incorrect.
+    '4006': The tonce has already been used.
+
+    '4013': TwoFactor failed.
+
+    '4016': The user does not exist.
+    '4017': The user does not activated.
+    '4018': The user has no id_document.
+
+    '4020': The user has no OTP.
+
+    '4023': This currency can not withdraw.
+
+    '4026': Wrong email or password.
+    '4027': Invalid OTP code.
+    '4028': Inconsistent passwords.
+    '4029': User exist.
+
+    '4031': Failed.
+
+    '4040': 图片资料不全。
+
+    '4043': 请使用私钥签名，并指定sign_type为private_key。
+
+    '4045': It is forbidden to transfer to enterprise account.
+
+    '4053': Withdraw failed.
+
+    '4055': 实名认证通过24小时内不允许操作此接口
+    '4056': 修改两步验证24小时内不允许操作此接口
+
+    '5001': Verification code request frequency is too fast, please try again later.
+    '5002': Invalid authentication code.
+    '5003': Verification code does not exist.
+    '5004': Email or Mobile number is required.
+    '5005': 以达到创建上限。
