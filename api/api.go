@@ -22,6 +22,11 @@ import (
 func main() {
 	initialize()
 	e := echo.New()
+
+	e.File("/web", "public/assets/index.html")
+	e.File("/web/*", "public/assets/index.html")
+	e.Static("/assets", "public/assets")
+
 	if envConfig.CurrentEnv.Newrelic.AppName != "" && envConfig.CurrentEnv.Newrelic.LicenseKey != "" {
 		e.Use(newrelic.NewRelic(envConfig.CurrentEnv.Newrelic.AppName, envConfig.CurrentEnv.Newrelic.LicenseKey))
 	}
