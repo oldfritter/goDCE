@@ -237,12 +237,8 @@ func optimisticallyLockAccountAndCreate(db *utils.GormDB, balance, locked decima
 	(*attrs)["created_at"] = time.Now().Format("2006-01-02 15:04:05")
 	(*attrs)["updated_at"] = (*attrs)["created_at"]
 
-	now := time.Now().Format("2006-01-02 15:04:05")
-
-	where := fmt.Sprintf(" WHERE accounts.balance = ? AND accounts.locked = ? AND accounts.id = ? ", balance, locked, (*attrs)["account_id"])
-	selectS := fmt.Sprintf(" SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?  FROM accounts ", (*attrs)["user_id"], (*attrs)["account_id"], (*attrs)["reason"], (*attrs)["balance"], (*attrs)["locked"], (*attrs)["fee"], (*attrs)["amount"], (*attrs)["modifiable_id"], (*attrs)["modifiable_type"], (*attrs)["currency_id"], (*attrs)["fun"], now, now)
-	sql := `INSERT INTO account_versions (user_id, account_id, reason, balance, locked, fee, amount, modifiable_id, modifiable_type, currency_id, fun, created_at, updated_at) ` + selectS + where
-	result := db.Exec(sql)
+	sql := `INSERT INTO account_versions (user_id, account_id, reason, balance, locked, fee, amount, modifiable_id, modifiable_type, currency_id, fun, created_at, updated_at) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?  FROM accounts WHERE accounts.balance = ? AND accounts.locked = ? AND accounts.id = ?`
+	result := db.Exec(sql, (*attrs)["user_id"], (*attrs)["account_id"], (*attrs)["reason"], (*attrs)["balance"], (*attrs)["locked"], (*attrs)["fee"], (*attrs)["amount"], (*attrs)["modifiable_id"], (*attrs)["modifiable_type"], (*attrs)["currency_id"], (*attrs)["fun"], (*attrs)["created_at"], (*attrs)["updated_at"], balance, locked, (*attrs)["account_id"])
 	if result.RowsAffected != 1 {
 		err = fmt.Errorf("Insert row failed.")
 	}
