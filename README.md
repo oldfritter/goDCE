@@ -1,4 +1,4 @@
-#Go版交易所
+# Go版交易所
 
 ```
                        _______    ______   ________ 
@@ -16,7 +16,7 @@
                                                                        
 ```
 
-#Install Golang
+# Install Golang
 ```
 wget https://dl.google.com/go/go1.11.2.linux-amd64.tar.gz
 
@@ -32,30 +32,30 @@ source ~/.bashrc
 
 ```
 
-#获取代码
+# 获取代码
 ```
 go get github.com/oldfitter/goDCE
 ```
-#安装依赖
+# 安装依赖
 ```
 cd ~/go/src/github.com/oldfritter/goDCE 
  ./install.sh # 绝大多数情况下，你是需要科学上网才能完成依赖安装
 ```
-#导入前端代码
+# 导入前端代码
 将前端代码导入public/assets目录下即可
-#编译
+# 编译
 ```
 ./build.sh
 ```
-#启动
+# 启动
 ```
 ./start.sh
 ```
-#停止
+# 停止
 ```
 ./stop.sh
 ```
-#重启
+# 重启
 ```
 ./restart.sh
 ```
