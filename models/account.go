@@ -86,7 +86,7 @@ func (account *Account) SubFunds(db *utils.GormDB, amount, fee decimal.Decimal, 
 		err = fmt.Errorf("cannot add funds (amount: %v)", amount)
 		return
 	}
-	err = account.changeBalanceAndLocked(db, amount, decimal.Zero)
+	err = account.changeBalanceAndLocked(db, amount.Neg(), decimal.Zero)
 	if err != nil {
 		return
 	}
@@ -195,10 +195,10 @@ func (account *Account) after(db *utils.GormDB, fun int, amount decimal.Decimal,
 }
 
 func (account *Account) changeBalanceAndLocked(db *utils.GormDB, deltaB, deltaL decimal.Decimal) (err error) {
+	db.Set("gorm:query_option", "FOR UPDATE").First(&account, account.Id)
 	account.Balance = account.Balance.Add(deltaB)
 	account.Locked = account.Locked.Add(deltaL)
-	db.Set("gorm:query_option", "FOR UPDATE").First(&account, account.Id)
-	updateSql := fmt.Sprintf("UPDATE accounts SET balance = balance + %v, locked = locked + %v WHERE accounts.id = %v ", account.Balance, account.Locked, account.Id)
+	updateSql := fmt.Sprintf("UPDATE accounts SET balance = balance + %v, locked = locked + %v WHERE accounts.id = %v ", deltaB, deltaL, account.Id)
 	accountresult := db.Exec(updateSql)
 	if accountresult.RowsAffected != 1 {
 		err = fmt.Errorf("Insert row failed.")
