@@ -61,12 +61,15 @@ func AutoMigrations() {
 
 	// order
 	mainDB.AutoMigrate(&Order{})
+	backupDB.AutoMigrate(&Order{})
 
 	// token
 	mainDB.AutoMigrate(&Token{})
+	backupDB.AutoMigrate(&Token{})
 
 	// trade
 	mainDB.AutoMigrate(&Trade{})
+	backupDB.AutoMigrate(&Trade{})
 
 	// user
 	mainDB.AutoMigrate(&User{})
