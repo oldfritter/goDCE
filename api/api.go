@@ -15,6 +15,7 @@ import (
 	"github.com/labstack/echo/middleware"
 	envConfig "github.com/oldfritter/goDCE/config"
 	"github.com/oldfritter/goDCE/initializers"
+	"github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/routes"
 	"github.com/oldfritter/goDCE/utils"
 )
@@ -70,6 +71,8 @@ func customHTTPErrorHandler(err error, context echo.Context) {
 func initialize() {
 	envConfig.InitEnv()
 	utils.InitMainDB()
+	utils.InitBackupDB()
+	models.AutoMigrations()
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
 

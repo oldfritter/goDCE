@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	envConfig "github.com/oldfritter/goDCE/config"
+	"github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/trade/matching"
 	"github.com/oldfritter/goDCE/utils"
 )
@@ -25,6 +26,8 @@ func main() {
 func initialize() {
 	envConfig.InitEnv()
 	utils.InitMainDB()
+	utils.InitBackupDB()
+	models.AutoMigrations()
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
 

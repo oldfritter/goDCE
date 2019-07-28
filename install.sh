@@ -21,6 +21,7 @@ go get -u github.com/gomodule/redigo/redis
 go get -u github.com/jinzhu/gorm
 go get -u github.com/kylelemons/go-gypsy
 go get -u github.com/labstack/echo
+go get -u github.com/oldfritter/matching
 go get -u github.com/qor/i18n
 go get -u github.com/shopspring/decimal
 go get -u github.com/streadway/amqp
