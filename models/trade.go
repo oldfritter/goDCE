@@ -7,7 +7,7 @@ import (
 
 type Fee struct {
 	CurrencyId   int             `json:"currency_id"`
-	CurrencyCode string          `json:"currency_code"`
+	CurrencyCode string          `json:"currency_code" gorm:"type:varchar(16)"`
 	Amount       decimal.Decimal `json:"amount"`
 }
 
@@ -21,7 +21,7 @@ type Trade struct {
 	Volume   decimal.Decimal `gorm:"type:decimal(32,16);default:null;" json:"volume"`
 	Funds    decimal.Decimal `gorm:"type:decimal(32,16);default:null;" json:"funds"`
 
-	Side      string `json:"side" sql:"-"`
+	Side      string `json:"side" sql:"-" gorm:"type:varchar(4)"`
 	Market    Market `json:"market" sql:"-"`
 	AskUserId int    `json:"ask_user_id"`
 	BidUserId int    `json:"bid_user_id"`
@@ -33,7 +33,6 @@ type Attrs struct {
 	Amount decimal.Decimal `json:"amount"`
 	Price  decimal.Decimal `json:"price"`
 	Date   int64           `json:"date"`
-	// Type   string          `json:"type"`
 }
 
 func (trade *Trade) AfterFind(db *gorm.DB) {

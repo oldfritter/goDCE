@@ -14,7 +14,7 @@ production:
     host: 127.0.0.1
     port: 3306
     dbargs: charset=utf8&parseTime=True&loc=Local
-    pool: 5  
+    pool: 5
 
 development:
   main:

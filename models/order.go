@@ -21,10 +21,10 @@ type Order struct {
 	BidAccountId  int             `json:"bid_account_id" gorm:"default:null"`
 	MarketId      int             `json:"market_id"`
 	State         int             `json:"-"`
-	Type          string          `json:"type"`
-	Sn            string          `json:"sn" gorm:"default:null"`
-	Source        string          `json:"source"`
-	OrderType     string          `json:"order_type"`
+	Type          string          `gorm:"type:varchar(16)" json:"type"`
+	Sn            string          `gorm:"type:varchar(16)" json:"sn" gorm:"default:null"`
+	Source        string          `gorm:"type:varchar(16)" json:"source"`
+	OrderType     string          `gorm:"type:varchar(16)" json:"order_type"`
 	Price         decimal.Decimal `gorm:"type:decimal(32,16);default:null;" json:"price"`
 	Volume        decimal.Decimal `gorm:"type:decimal(32,16);default:null;" json:"volume"`
 	OriginVolume  decimal.Decimal `gorm:"type:decimal(32,16);default:null;" json:"origin_volume"`

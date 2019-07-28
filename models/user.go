@@ -8,9 +8,9 @@ import (
 
 type User struct {
 	CommonModel
-	Sn             string `gorm:"default:null" json:"sn"`
-	PasswordDigest string `gorm:"default:null"`
-	Nickname       string `gorm:"default:null" json:"nickname"`
+	Sn             string `gorm:"type:varchar(32);default:null" json:"sn"`
+	PasswordDigest string `gorm:"type:varchar(64);default:null"`
+	Nickname       string `gorm:"type:varchar(32);default:null" json:"nickname"`
 	State          int    `gorm:"default:null" json:"state"`
 	Activated      bool   `gorm:"default:null" json:"activated"`
 	Disabled       bool   `json:"disabled"`

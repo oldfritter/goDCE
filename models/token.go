@@ -8,7 +8,7 @@ import (
 
 type Token struct {
 	CommonModel
-	Token        string    `json:"token"`
+	Token        string    `gorm:"type:varchar(64)" json:"token"`
 	UserId       int       `json:"user_id"`
 	IsUsed       bool      `json:"is_used"`
 	ExpireAt     time.Time `gorm:"default:null" json:"expire_at"`
