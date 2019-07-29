@@ -2,10 +2,9 @@ package sneakerWorkers
 
 import (
 	"encoding/json"
-	"strconv"
+	"fmt"
 	"time"
 
-	"github.com/gomodule/redigo/redis"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 	"github.com/shopspring/decimal"
@@ -36,7 +35,6 @@ func createPoint(marketId int, period int64, begin, end time.Time) {
 		k.Period = int(period)
 		k.Timestamp = begin.Unix()
 	}
-
 	mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, end).Select("first(price) as open").Scan(&k)
 	if k.Open.Equal(decimal.Zero) {
 		mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("created_at < ?", begin).Select("last(price) as open").Scan(&k)
@@ -52,23 +50,16 @@ func createPoint(marketId int, period int64, begin, end time.Time) {
 		mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, end).Select("last(price) as close").Scan(&k)
 		mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, end).Select("sum(volume) as volume").Scan(&k)
 	}
-
 	mainDB.Save(&k)
 	mainDB.DbCommit()
 
 	kRedis := utils.GetRedisConn("k")
 	defer kRedis.Close()
-	last, err := redis.String(kRedis.Do("LINDEX", k.RedisKey(), -1))
-	if err != nil {
-		kRedis.Do("RPUSH", k.RedisKey(), k.Data())
-	} else {
-		var item [6]decimal.Decimal
-		json.Unmarshal([]byte(last), &item)
-		if item[0].String() == strconv.FormatInt((begin.Unix()-period*60), 10) {
-			kRedis.Do("RPUSH", k.RedisKey(), k.Data())
-		} else if item[0].String() == strconv.FormatInt((begin.Unix()), 10) {
-			kRedis.Do("RPOP", k.RedisKey())
-			kRedis.Do("RPUSH", k.RedisKey(), k.Data())
-		}
+	b, _ := json.Marshal(k.Data())
+	kRedis.Send("ZREMRANGEBYSCORE", k.RedisKey(), k.Timestamp)
+	kRedis.Send("ZADD", k.RedisKey(), k.Timestamp, string(b))
+	if _, err := kRedis.Do(""); err != nil {
+		fmt.Println(err)
+		return
 	}
 }

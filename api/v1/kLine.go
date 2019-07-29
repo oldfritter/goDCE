@@ -2,25 +2,39 @@ package v1
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
-	"github.com/shopspring/decimal"
 )
+
+type chart struct {
+	K1     []interface{} `json:"k1"`
+	K5     []interface{} `json:"k5"`
+	K15    []interface{} `json:"k15"`
+	K30    []interface{} `json:"k30"`
+	K60    []interface{} `json:"k60"`
+	K120   []interface{} `json:"k120"`
+	K240   []interface{} `json:"k240"`
+	K360   []interface{} `json:"k360"`
+	K720   []interface{} `json:"k720"`
+	K1440  []interface{} `json:"k1440"`
+	K4320  []interface{} `json:"k4320"`
+	K10080 []interface{} `json:"k10080"`
+}
 
 func V1GetK(context echo.Context) error {
 	var market Market
 	mainDB := utils.MainDbBegin()
 	defer mainDB.DbRollback()
-	if mainDB.Where("name = ?", context.QueryParam("market")).First(&market).RecordNotFound() {
+	if mainDB.Where("code = ?", context.QueryParam("market")).First(&market).RecordNotFound() {
 		return utils.BuildError("1021")
 	}
-	limit := 30
+	limit := 100
 	if context.QueryParam("limit") != "" {
 		limit, _ = strconv.Atoi(context.QueryParam("limit"))
 		if limit > 10000 {
@@ -28,137 +42,104 @@ func V1GetK(context echo.Context) error {
 		}
 	}
 	period := 1
-	periodstr := context.QueryParam("period")
-	periods := []string{"1", "5", "15", "30", "60", "120", "240", "360", "720", "1440", "4320", "10080"}
+	periodstr, _ := strconv.Atoi(context.QueryParam("period"))
+	periods := []int{1, 5, 15, 30, 60, 120, 240, 360, 720, 1440, 4320, 10080}
 	periodBool := false
 	for _, per := range periods {
 		if periodstr == per {
 			periodBool = true
+			period = per
 		}
 	}
-	if periodBool {
-		period, _ = strconv.Atoi(periodstr)
-	} else {
+	if !periodBool {
 		return utils.BuildError("1053")
 	}
 
 	kRedis := utils.GetRedisConn("k")
 	defer kRedis.Close()
 
-	key := market.KLineRedisKey(periodstr)
-	var items [][6]decimal.Decimal
-	if context.QueryParam("timestamp") != "" {
-		stamp, _ := strconv.Atoi(context.QueryParam("timestamp"))
-		timestamp := int64(stamp)
-		value, _ := redis.String(kRedis.Do("LINDEX", key, 0))
-		var item [6]decimal.Decimal
-		json.Unmarshal([]byte(value), &item)
-
-		offset := (timestamp - item[0].IntPart()) / 60 / int64(period)
-		if offset < 0 {
-			offset = 0
-		}
-
-		values, err := redis.Values(kRedis.Do("LRANGE", key, offset, offset+int64(limit)-1))
-		if err != nil {
-			fmt.Println("lrange err", err.Error())
-			return utils.BuildError("1026")
-		}
-		for _, v := range values {
-			json.Unmarshal(v.([]byte), &item)
-			items = append(items, item)
-		}
+	var timestamp int
+	if context.QueryParam("timestamp") == "" {
+		timestamp = int(time.Now().Unix())
 	} else {
-		length, _ := kRedis.Do("LLEN", key)
-		offset := length.(int64) - int64(limit)
-		if offset < 0 {
-			offset = 0
-		}
-		values, err := redis.Values(kRedis.Do("LRANGE", key, offset, -1))
-		if err != nil {
-			fmt.Println("lrange err", err.Error())
-			return utils.BuildError("1026")
-		}
-		for _, v := range values {
-			var item [6]decimal.Decimal
-			json.Unmarshal(v.([]byte), &item)
-			items = append(items, item)
-		}
+		timestamp, _ = strconv.Atoi(context.QueryParam("timestamp"))
+	}
+	minTimestamp := timestamp - period*60*limit
+
+	values, _ := redis.Values(
+		kRedis.Do(
+			"ZREVRANGEBYSCORE",
+			market.KLineRedisKey(period),
+			timestamp,
+			minTimestamp,
+		),
+	)
+
+	var result []interface{}
+	for _, value := range values {
+		var item []string
+		json.Unmarshal(value.([]byte), &item)
+		result = append(result, item)
 	}
 	response := utils.SuccessResponse
-	response.Body = items
+	response.Body = result
 	return context.JSON(http.StatusOK, response)
-}
-
-type chart struct {
-	K1     [][6]decimal.Decimal `json:"k1"`
-	K5     [][6]decimal.Decimal `json:"k5"`
-	K15    [][6]decimal.Decimal `json:"k15"`
-	K30    [][6]decimal.Decimal `json:"k30"`
-	K60    [][6]decimal.Decimal `json:"k60"`
-	K120   [][6]decimal.Decimal `json:"k120"`
-	K240   [][6]decimal.Decimal `json:"k240"`
-	K360   [][6]decimal.Decimal `json:"k360"`
-	K720   [][6]decimal.Decimal `json:"k720"`
-	K1440  [][6]decimal.Decimal `json:"k1440"`
-	K4320  [][6]decimal.Decimal `json:"k4320"`
-	K10080 [][6]decimal.Decimal `json:"k10080"`
 }
 
 func V1GetChart(context echo.Context) error {
 	var market Market
 	mainDB := utils.MainDbBegin()
 	defer mainDB.DbRollback()
-	if mainDB.Where("name = ?", context.QueryParam("market")).First(&market).RecordNotFound() {
+	if mainDB.Where("code = ?", context.QueryParam("market")).First(&market).RecordNotFound() {
 		return utils.BuildError("1021")
 	}
 	kRedis := utils.GetRedisConn("k")
 	defer kRedis.Close()
+	limit := 100
+	timestamp := int(time.Now().Unix())
 
 	var c chart
-	periods := []string{"1", "5", "15", "30", "60", "120", "240", "360", "720", "1440", "4320", "10080"}
+	periods := []int{1, 5, 15, 30, 60, 120, 240, 360, 720, 1440, 4320, 10080}
 	for _, period := range periods {
-		key := market.KLineRedisKey(period)
-		length, _ := kRedis.Do("LLEN", key)
-		offset := length.(int64) - 240
-		if offset < 0 {
-			offset = 0
-		}
-		values, err := redis.Values(kRedis.Do("LRANGE", key, offset, -1))
-		if err != nil {
-			fmt.Println("lrange err", err.Error())
-			return utils.BuildError("1026")
-		}
-		var items [][6]decimal.Decimal
+		minTimestamp := timestamp - period*60*limit
+		values, _ := redis.Values(
+			kRedis.Do(
+				"ZREVRANGEBYSCORE",
+				market.KLineRedisKey(period),
+				timestamp,
+				minTimestamp,
+			),
+		)
+		var items []interface{}
 		for _, v := range values {
-			var item [6]decimal.Decimal
+			var item [6]string
 			json.Unmarshal(v.([]byte), &item)
 			items = append(items, item)
 		}
 		switch period {
-		case "1":
+		case 1:
 			c.K1 = items
-		case "5":
+		case 5:
 			c.K5 = items
-		case "15":
+		case 15:
 			c.K15 = items
-		case "30":
+		case 30:
 			c.K30 = items
-		case "60":
+		case 60:
 			c.K60 = items
-		case "120":
+		case 120:
 			c.K120 = items
-		case "240":
+		case 240:
 			c.K240 = items
-		case "360":
+		case 360:
 			c.K360 = items
-		case "720":
+		case 720:
 			c.K720 = items
-		case "1440":
+		case 1440:
 			c.K1440 = items
-		case "4320":
+		case 4320:
 			c.K4320 = items
-		case "10080":
+		case 10080:
 			c.K10080 = items
 		}
 	}

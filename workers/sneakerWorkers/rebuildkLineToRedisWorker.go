@@ -2,13 +2,10 @@ package sneakerWorkers
 
 import (
 	"encoding/json"
-	"strconv"
-	"time"
+	"fmt"
 
-	"github.com/gomodule/redigo/redis"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
-	"github.com/shopspring/decimal"
 )
 
 func (worker *Worker) RebuildKLineToRedisWorker(payloadJson *[]byte) (queueName string, message []byte) {
@@ -26,10 +23,18 @@ func (worker *Worker) RebuildKLineToRedisWorker(payloadJson *[]byte) (queueName 
 
 	kRedis := utils.GetRedisConn("k")
 	defer kRedis.Close()
-	for _, kLine := range ks {
-		kRedis.Do("RPUSH", k.RedisKey()+":rebuild", kLine.Data())
+	for i, k := range ks {
+		b, _ := json.Marshal(k.Data())
+		kRedis.Send("ZREMRANGEBYSCORE", k.RedisKey(), k.Timestamp)
+		kRedis.Send("ZADD", k.RedisKey(), k.Timestamp, string(b))
+		if i%10 == 9 {
+			if _, err := kRedis.Do(""); err != nil {
+				fmt.Println(err)
+			}
+		}
 	}
-	kRedis.Do("RENAME", k.RedisKey()+":rebuild", k.RedisKey())
-
+	if _, err := kRedis.Do(""); err != nil {
+		fmt.Println(err)
+	}
 	return
 }

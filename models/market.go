@@ -82,7 +82,7 @@ func (market *Market) LatestTradesRedisKey() string {
 func (market *Market) TickerRedisKey() string {
 	return "goDCE:ticker:" + market.Code
 }
-func (market *Market) KLineRedisKey(period string) string {
+func (market *Market) KLineRedisKey(period int) string {
 	return fmt.Sprintf("goDCE:k:%v:%v", market.Id, period)
 }
 
