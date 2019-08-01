@@ -11,6 +11,7 @@ import (
 	"github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/trade/treat"
 	"github.com/oldfritter/goDCE/utils"
+	"github.com/oldfritter/goDCE/workers/sneakerWorkers"
 )
 
 func main() {
@@ -30,6 +31,7 @@ func initialize() {
 	models.AutoMigrations()
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
+	sneakerWorkers.InitWorkers()
 
 	err := ioutil.WriteFile("pids/treat.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
 	if err != nil {
