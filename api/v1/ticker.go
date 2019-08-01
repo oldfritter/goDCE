@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gomodule/redigo/redis"
@@ -10,22 +11,16 @@ import (
 )
 
 func V1GetTickers(context echo.Context) error {
-	var markets []Market
-	mainDB := utils.MainDbBegin()
-	defer mainDB.DbRollback()
-	mainDB.Where("visible is true").Find(&markets)
-
 	tickerRedis := utils.GetRedisConn("ticker")
 	defer tickerRedis.Close()
-
-	var tickers []Ticker
-	for _, market := range markets {
-		if !market.Visible {
-			continue
+	values, _ := redis.Values(tickerRedis.Do("HGETALL", TickersRedisKey))
+	var tickers []interface{}
+	for i, value := range values {
+		if i%2 == 1 {
+			ticker := Ticker{}
+			json.Unmarshal(value.([]byte), &ticker)
+			tickers = append(tickers, ticker)
 		}
-		var tickerStruct Ticker
-		buildTickerWithMarket(&tickerStruct, &market, tickerRedis)
-		tickers = append(tickers, tickerStruct)
 	}
 	response := utils.SuccessResponse
 	response.Body = tickers
@@ -33,26 +28,18 @@ func V1GetTickers(context echo.Context) error {
 }
 
 func V1GetTickersMarket(context echo.Context) error {
-	tickerRedis := utils.GetRedisConn("ticker")
-	defer tickerRedis.Close()
-
 	var market Market
 	mainDB := utils.MainDbBegin()
 	defer mainDB.DbRollback()
-
-	if mainDB.Where("name = ?", context.QueryParam("market")).First(&market).RecordNotFound() {
+	if mainDB.Where("code = ?", context.Param("market")).First(&market).RecordNotFound() {
 		return utils.BuildError("1021")
 	}
-	var tickerStruct Ticker
-	buildTickerWithMarket(&tickerStruct, &market, tickerRedis)
+	tickerRedis := utils.GetRedisConn("ticker")
+	defer tickerRedis.Close()
+	value, _ := tickerRedis.Do("HGET", TickersRedisKey, market.Id)
+	ticker := Ticker{}
+	json.Unmarshal(value.([]byte), &ticker)
 	response := utils.SuccessResponse
-	response.Body = tickerStruct
+	response.Body = ticker
 	return context.JSON(http.StatusOK, response)
-}
-
-func buildTickerWithMarket(tickerStruct *Ticker, market *Market, tickerRedis redis.Conn) {
-	var ticker TickerAspect
-	result, _ := redis.Values(tickerRedis.Do("HGETALL", (*market).TickerRedisKey()))
-	ticker.Add(result)
-	tickerStruct.TickerAspect = ticker
 }

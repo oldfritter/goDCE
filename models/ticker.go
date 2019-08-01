@@ -1,8 +1,11 @@
 package models
 
 import (
-	"fmt"
 	"github.com/shopspring/decimal"
+)
+
+var (
+	TickersRedisKey = "goDCE:tickers"
 )
 
 type TickerAspect struct {
@@ -16,40 +19,8 @@ type TickerAspect struct {
 }
 
 type Ticker struct {
-	MarketId        int          `json:"market_id"`
-	Name            string       `json:"name"`
-	Code            string       `json:"code"`
-	Quote           string       `json:"quote"`
-	PriceGroupFixed string       `json:"price_group_fixed"`
-	TickerAspect    TickerAspect `json:"ticker"`
-}
-
-func (ticker *TickerAspect) Add(attrs []interface{}) {
-	colume := ""
-	for i, v := range attrs {
-		if (i % 2) == 0 {
-			colume = fmt.Sprintf("%s", v)
-		} else {
-			if colume == "buy" {
-				ticker.Buy, _ = decimal.NewFromString(fmt.Sprintf("%s", v))
-			} else if colume == "sell" {
-				ticker.Sell, _ = decimal.NewFromString(fmt.Sprintf("%s", v))
-			} else if colume == "low" {
-				ticker.Low, _ = decimal.NewFromString(fmt.Sprintf("%s", v))
-			} else if colume == "high" {
-				ticker.High, _ = decimal.NewFromString(fmt.Sprintf("%s", v))
-			} else if colume == "last" {
-				ticker.Last, _ = decimal.NewFromString(fmt.Sprintf("%s", v))
-			} else if colume == "open" {
-				ticker.Open, _ = decimal.NewFromString(fmt.Sprintf("%s", v))
-			} else if colume == "volume" {
-				ticker.Volume, _ = decimal.NewFromString(fmt.Sprintf("%s", v))
-			}
-		}
-	}
-
-}
-
-func (ticker *Ticker) RedisKey() string {
-	return fmt.Sprintf("goDCE:ticker:%v", ticker.Code)
+	MarketId     int          `json:"market_id"`
+	Name         string       `json:"name"`
+	Code         string       `json:"code"`
+	TickerAspect TickerAspect `json:"ticker"`
 }

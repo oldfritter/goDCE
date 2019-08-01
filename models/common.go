@@ -58,6 +58,7 @@ func AutoMigrations() {
 
 	// market
 	mainDB.AutoMigrate(&Market{})
+	mainDB.Model(&Market{}).AddUniqueIndex("markets_idx0", "code")
 
 	// order
 	mainDB.AutoMigrate(&Order{})

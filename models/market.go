@@ -15,23 +15,19 @@ type OrderCurrency struct {
 }
 
 type Market struct {
-	Id              int
-	Name            string `gorm:"type:varchar(16)"`
-	Code            string `gorm:"type:varchar(16)"`
-	PriceGroupFixed int
-	SortOrder       int
+	CommonModel
+	Name            string          `gorm:"type:varchar(16)"`
+	Code            string          `gorm:"type:varchar(16)"`
+	PriceGroupFixed int             `json:"price_group_fixed"`
+	SortOrder       int             `json:"sort_order"`
 	AskCurrencyId   int             `json:"ask_currency_id"`
 	BidCurrencyId   int             `json:"bid_currency_id"`
 	AskFee          decimal.Decimal `json:"ask_fee" gorm:"type:decimal(32,16);default:null;"`
 	BidFee          decimal.Decimal `json:"bid_fee" gorm:"type:decimal(32,16);default:null;"`
 	AskFixed        int             `json:"ask_fixed"`
 	BidFixed        int             `json:"bid_fixed"`
-	Visible         bool
-	Tradable        bool
-	// Logo             string
-	// CoinmarketcapUrl string
-	// BaseUnit         string
-	// QuoteUnit        string
+	Visible         bool            `json:"visible"`
+	Tradable        bool            `json:"tradable"`
 
 	// 撮合相关属性
 	Ack             bool
