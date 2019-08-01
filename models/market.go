@@ -30,13 +30,13 @@ type Market struct {
 	Tradable        bool            `json:"tradable"`
 
 	// 撮合相关属性
-	Ack             bool
-	Durable         bool
-	MatchingAble    bool
-	MatchingNode    string `gorm:"default:'a'; type:varchar(11)"`
-	TradeTreatNode  string `gorm:"default:'a'; type:varchar(11)"`
-	OrderCancelNode string `gorm:"default:'a'; type:varchar(11)"`
-	Running         bool   `sql:"-"`
+	Ack             bool   `json:"-"`
+	Durable         bool   `json:"-"`
+	MatchingAble    bool   `json:"-"`
+	MatchingNode    string `json:"-" gorm:"default:'a'; type:varchar(11)"`
+	TradeTreatNode  string `json:"-" gorm:"default:'a'; type:varchar(11)"`
+	OrderCancelNode string `json:"-" gorm:"default:'a'; type:varchar(11)"`
+	Running         bool   `json:"-" sql:"-"`
 }
 
 // Exchange
