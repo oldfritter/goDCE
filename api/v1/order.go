@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo"
 	. "github.com/oldfritter/goDCE/models"
@@ -127,8 +126,8 @@ func V1PostOrders(context echo.Context) error {
 		return utils.BuildError("1022")
 	}
 	order := Order{
-		Source:       "APIv1",
-		State:        100,
+		Source:       context.Param("platform") + "-APIv1",
+		State:        WAIT,
 		UserId:       user.Id,
 		MarketId:     market.Id,
 		Volume:       volume,
@@ -140,7 +139,7 @@ func V1PostOrders(context echo.Context) error {
 		OriginLocked: locked,
 	}
 	response := utils.SuccessResponse
-	err := tryToChangeAccount(context, &order, &market, side, user.Id, 9)
+	err := tryToChangeAccount(context, &order, &market, side, user.Id, 2)
 	if err == nil {
 		pushMessageToMatching(&order, &market, "submit")
 		response := utils.SuccessResponse
@@ -196,7 +195,7 @@ func V1PostOrdersMulti(context echo.Context) error {
 		}
 		order := Order{
 			Source:       context.Param("platform") + "-APIv1",
-			State:        100,
+			State:        WAIT,
 			UserId:       user.Id,
 			MarketId:     market.Id,
 			Volume:       volume,
@@ -207,7 +206,7 @@ func V1PostOrdersMulti(context echo.Context) error {
 			Locked:       locked,
 			OriginLocked: locked,
 		}
-		err := tryToChangeAccount(context, &order, &market, orderAttr.Side, user.Id, 9)
+		err := tryToChangeAccount(context, &order, &market, orderAttr.Side, user.Id, 2)
 		if err == nil {
 			pushMessageToMatching(&order, &market, "submit")
 			orders[i] = order
@@ -348,7 +347,6 @@ func tryToChangeAccount(context echo.Context, order *Order, market *Market, side
 	mainDB.DbRollback()
 	if times > 0 {
 		(*order).Id = 0
-		time.Sleep(500 * time.Millisecond)
 		return tryToChangeAccount(context, order, market, side, user_id, times-1)
 	}
 	return utils.BuildError("2002")
