@@ -147,6 +147,7 @@ func V1PostOrders(context echo.Context) error {
 	} else {
 		response = utils.BuildError("3022")
 		response.Body = order
+		return response
 	}
 	return context.JSON(http.StatusOK, response)
 
@@ -210,12 +211,13 @@ func V1PostOrdersMulti(context echo.Context) error {
 		if err == nil {
 			pushMessageToMatching(&order, &market, "submit")
 			orders[i] = order
-			response.Body = orders
 		} else {
 			response = utils.BuildError("3022")
 			response.Body = orders
+			return response
 		}
 	}
+	response.Body = orders
 	return context.JSON(http.StatusOK, response)
 }
 
