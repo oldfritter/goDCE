@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -47,10 +46,6 @@ func (worker *Worker) SubscribeMessageByQueue(arguments amqp.Table) error {
 	if err != nil {
 		fmt.Errorf("Channel: %s", err)
 	}
-	queue, err := channel.QueueDeclare((*worker).Queue, true, false, false, false, arguments)
-	if err != nil {
-		return fmt.Errorf("Queue Declare: %s", err)
-	}
 
 	if (*worker).Exchange != "" && (*worker).RoutingKey != "" {
 		channel.ExchangeDeclare((*worker).Exchange, "topic", (*worker).Durable, false, false, false, nil)
@@ -58,16 +53,20 @@ func (worker *Worker) SubscribeMessageByQueue(arguments amqp.Table) error {
 		channel.ExchangeDeclare((*worker).Arguments["x-dead-letter-exchange"], "topic", (*worker).Durable, false, false, false, nil)
 		channel.QueueBind((*worker).Queue, "#", (*worker).Arguments["x-dead-letter-exchange"], false, nil)
 	}
-	err = channel.Qos(1, 0, false)
-	msgs, err := channel.Consume(queue.Name, "", false, false, false, false, nil)
+	err = channel.Qos(
+		1,     // prefetch count
+		0,     // prefetch size
+		false, // global
+	)
+
 	for i, step := range (*worker).Steps {
 		_, err = channel.QueueDeclare(
-			(*worker).Arguments["x-dead-letter-exchange"]+"-"+strconv.Itoa(i+1),
-			(*worker).Durable,
-			false,
-			false,
-			false,
-			amqp.Table{"x-dead-letter-exchange": (*worker).Arguments["x-dead-letter-exchange"], "x-message-ttl": int32(step)},
+			(*worker).Arguments["x-dead-letter-exchange"]+"-"+strconv.Itoa(i+1), // queue name
+			(*worker).Durable, // durable
+			false,             // delete when usused
+			false,             // exclusive
+			false,             // no-wait
+			amqp.Table{"x-dead-letter-exchange": (*worker).Arguments["x-dead-letter-exchange"], "x-message-ttl": int32(step)}, // arguments
 		)
 		if err != nil {
 			return fmt.Errorf("Queue Declare: %s", err)
@@ -75,17 +74,22 @@ func (worker *Worker) SubscribeMessageByQueue(arguments amqp.Table) error {
 	}
 
 	go func(queue string) {
+		channel, err := utils.RabbitMqConnect.Channel()
+		if err != nil {
+			fmt.Errorf("Channel: %s", err)
+		}
+		msgs, _ := channel.Consume(
+			queue, // queue
+			"",    // consumer
+			false, // auto-ack
+			false, // exclusive
+			false, // no-local
+			false, // no-wait
+			nil,   // args
+		)
 		for _, w := range AllWorkers {
 			if w.Queue == queue {
 				for d := range msgs {
-					logFile, err := os.Create(w.Log)
-					defer logFile.Close()
-					if err != nil {
-						log.Fatalln("open log file error !")
-					}
-					workerLog := log.New(logFile, "[Info]", log.LstdFlags)
-					workerLog.SetPrefix("[Info]")
-					w.Logger = workerLog
 					response := reflect.ValueOf(&w).MethodByName(w.Name).Call([]reflect.Value{reflect.ValueOf(&d.Body)})
 					if !(response[0].String() == "") && !response[1].IsNil() {
 						retry(response[0].String(), response[1].Bytes())
@@ -103,17 +107,18 @@ func retry(queueName string, message []byte) error {
 	channel, err := utils.RabbitMqConnect.Channel()
 	defer channel.Close()
 	err = (*channel).Publish(
-		"",
-		queueName,
-		false,
-		false,
+		"",        // publish to an exchange
+		queueName, // routing to 0 or more queues
+		false,     // mandatory
+		false,     // immediate
 		amqp.Publishing{
 			Headers:         amqp.Table{},
 			ContentType:     "text/plain",
 			ContentEncoding: "",
 			Body:            message,
-			DeliveryMode:    amqp.Persistent,
-			Priority:        0,
+			DeliveryMode:    amqp.Persistent, // amqp.Persistent, amqp.Transient // 1=non-persistent, 2=persistent
+			Priority:        0,               // 0-9
+			// a bunch of application/implementation-specific fields
 		},
 	)
 	if err != nil {
