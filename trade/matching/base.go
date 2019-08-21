@@ -3,8 +3,6 @@ package matching
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
 	"runtime"
 
 	envConfig "github.com/oldfritter/goDCE/config"
@@ -62,47 +60,32 @@ func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
 	if err != nil {
 		fmt.Errorf("Channel: %s", err)
 	}
-	queueName := (*assignment).MatchingQueue()
-	queue, err := channel.QueueDeclare(
-		queueName,
-		true,
-		false,
-		false,
-		false,
-		arguments,
-	)
-	if err != nil {
-		return fmt.Errorf("Queue Declare: %s", err)
-	}
-
 	channel.ExchangeDeclare((*assignment).MatchingExchange(), "topic", (*assignment).Durable, false, false, false, nil)
 	channel.QueueBind((*assignment).MatchingQueue(), (*assignment).Code, (*assignment).MatchingExchange(), false, nil)
 
-	msgs, err := channel.Consume(
-		queue.Name,
-		"",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
 	go func(id int) {
+		a := Assignments[id]
+		channel, err := utils.RabbitMqConnect.Channel()
+		if err != nil {
+			fmt.Errorf("Channel: %s", err)
+		}
+		msgs, _ := channel.Consume(
+			a.MatchingQueue(), // queue
+			"",                // consumer
+			false,             // auto-ack
+			false,             // exclusive
+			false,             // no-local
+			false,             // no-wait
+			nil,               // args
+		)
+
 		for d := range msgs {
-			a := Assignments[id]
 			if !a.MatchingAble {
 				d.Reject(true)
 				d.Nack(false, false)
 				runtime.Goexit()
 			}
-			logFile, err := os.Create(a.MatchingLogFilePath())
-			defer logFile.Close()
-			if err != nil {
-				log.Fatalln("open log file error !")
-			}
-			workerLog := log.New(logFile, "[Info]", log.LstdFlags)
-			workerLog.SetPrefix("[Info]")
-			doMatching(&d.Body, workerLog)
+			doMatching(&d.Body)
 			d.Ack(a.Ack)
 		}
 		return

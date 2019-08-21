@@ -2,13 +2,12 @@ package cancel
 
 import (
 	"encoding/json"
-	"log"
 
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 )
 
-func Cancel(payloadJson *[]byte, workerLog *log.Logger) {
+func Cancel(payloadJson *[]byte) {
 	var payload struct {
 		Id int `json:"id"`
 	}

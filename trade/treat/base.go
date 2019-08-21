@@ -2,8 +2,6 @@ package treat
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	envConfig "github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
@@ -47,44 +45,27 @@ func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
 	if err != nil {
 		fmt.Errorf("Channel: %s", err)
 	}
-	queueName := (*assignment).TradeTreatQueue()
-	queue, err := channel.QueueDeclare(
-		queueName,
-		true,
-		false,
-		false,
-		false,
-		arguments,
-	)
-	if err != nil {
-		return fmt.Errorf("Queue Declare: %s", err)
-	}
 
 	channel.ExchangeDeclare((*assignment).TradeTreatExchange(), "topic", (*assignment).Durable, false, false, false, nil)
 	channel.QueueBind((*assignment).TradeTreatQueue(), (*assignment).Code, (*assignment).TradeTreatExchange(), false, nil)
 
-	msgs, err := channel.Consume(
-		queue.Name,
-		"",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
 	go func(id int) {
+		a := Assignments[id]
+		channel, err := utils.RabbitMqConnect.Channel()
+		if err != nil {
+			fmt.Errorf("Channel: %s", err)
+		}
+		msgs, err := channel.Consume(
+			a.TradeTreatQueue(),
+			"",
+			false,
+			false,
+			false,
+			false,
+			nil,
+		)
 		for d := range msgs {
-			a := Assignments[id]
-
-			logFile, err := os.Create(a.TradeTreatLogFilePath())
-			defer logFile.Close()
-			if err != nil {
-				log.Fatalln("open log file error !")
-			}
-			workerLog := log.New(logFile, "[Info]", log.LstdFlags)
-			workerLog.SetPrefix("[Info]")
-
-			Treat(&d.Body, workerLog)
+			Treat(&d.Body)
 			d.Ack(a.Ack)
 		}
 		return

@@ -2,8 +2,6 @@ package cancel
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	envConfig "github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
@@ -47,43 +45,27 @@ func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
 	if err != nil {
 		fmt.Errorf("Channel: %s", err)
 	}
-	queueName := (*assignment).OrderCancelQueue()
-	queue, err := channel.QueueDeclare(
-		queueName, // name
-		true,      // durable
-		false,     // delete when usused
-		false,     // exclusive
-		false,     // no-wait
-		arguments, // arguments
-	)
-	if err != nil {
-		return fmt.Errorf("Queue Declare: %s", err)
-	}
+
 	channel.ExchangeDeclare((*assignment).OrderCancelExchange(), "topic", (*assignment).Durable, false, false, false, nil)
 	channel.QueueBind((*assignment).OrderCancelQueue(), (*assignment).Code, (*assignment).OrderCancelExchange(), false, nil)
 
-	msgs, err := channel.Consume(
-		queue.Name, // queue
-		"",         // consumer
-		false,      // auto-ack
-		false,      // exclusive
-		false,      // no-local
-		false,      // no-wait
-		nil,        // args
-	)
 	go func(id int) {
+		channel, err := utils.RabbitMqConnect.Channel()
+		if err != nil {
+			fmt.Errorf("Channel: %s", err)
+		}
+		a := Assignments[id]
+		msgs, err := channel.Consume(
+			a.OrderCancelQueue(), // queue
+			"",                   // consumer
+			false,                // auto-ack
+			false,                // exclusive
+			false,                // no-local
+			false,                // no-wait
+			nil,                  // args
+		)
 		for d := range msgs {
-			a := Assignments[id]
-
-			logFile, err := os.Create(a.OrderCancelLogFilePath())
-			defer logFile.Close()
-			if err != nil {
-				log.Fatalln("open log file error !")
-			}
-			workerLog := log.New(logFile, "[Info]", log.LstdFlags)
-			workerLog.SetPrefix("[Info]")
-
-			Cancel(&d.Body, workerLog)
+			Cancel(&d.Body)
 			d.Ack(a.Ack)
 		}
 		return

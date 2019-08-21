@@ -3,7 +3,6 @@ package treat
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	. "github.com/oldfritter/goDCE/models"
@@ -13,7 +12,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func Treat(payloadJson *[]byte, workerLog *log.Logger) {
+func Treat(payloadJson *[]byte) {
 	var offer matching.Offer
 	json.Unmarshal([]byte(*payloadJson), &offer)
 	tryCreateTrade(&offer, 2)
