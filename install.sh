@@ -7,7 +7,7 @@ cp -r config/interfaces.yml.example config/interfaces.yml
 cp -r config/redis.yml.example config/redis.yml
 cp -r config/workers.yml.example config/workers.yml
 
-mkdir bin
+mkdir cmd
 mkdir pids
 mkdir logs
 mkdir -p public/assets

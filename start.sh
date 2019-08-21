@@ -1,6 +1,6 @@
 #!/bin/sh
-nohup ./bin/api >> logs/api.log &
-nohup ./bin/matching >> logs/matching.log &
-nohup ./bin/cancel >> logs/cancel.log &
-nohup ./bin/treat >> logs/treat.log &
-nohup ./bin/workers >> logs/workers.log &
+nohup ./cmd/api >> logs/api.log &
+nohup ./cmd/matching >> logs/matching.log &
+nohup ./cmd/cancel >> logs/cancel.log &
+nohup ./cmd/treat >> logs/treat.log &
+nohup ./cmd/workers >> logs/workers.log &
