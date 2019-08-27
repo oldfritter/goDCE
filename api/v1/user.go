@@ -92,6 +92,7 @@ func V1PostUsersLogin(context echo.Context) error {
 		token.InitializeLoginToken()
 	}
 	mainDB.Create(&token)
+	mainDB.Where("user_id = ?", user.Id).Where("expire_at < ?", time.Now()).First(&user.Tokens)
 	mainDB.DbCommit()
 
 	response := utils.SuccessResponse
