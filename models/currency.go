@@ -1,7 +1,8 @@
 package models
 
 import (
-// "regexp"
+	// "regexp"
+	"github.com/oldfritter/goDCE/utils"
 )
 
 type Currency struct {
@@ -18,6 +19,11 @@ type Currency struct {
 	Depositable bool   `json:"depositable"`
 }
 
+var AllCurrencies []Currency
+
+func InitAllCurrencies(db *utils.GormDB) {
+	db.Where("visible = ?", true).Find(&AllCurrencies)
+}
 func (currency *Currency) IsEthereum() (result bool) {
 	if currency.Code == "eth" || currency.Erc20 || currency.Erc23 {
 		result = true

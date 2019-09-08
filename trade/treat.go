@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	envConfig "github.com/oldfritter/goDCE/config"
+	"github.com/oldfritter/goDCE/initializers"
 	"github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/trade/treat"
 	"github.com/oldfritter/goDCE/utils"
@@ -21,6 +22,7 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
+	initializers.DeleteListeQueue()
 	closeResource()
 }
 
@@ -32,6 +34,7 @@ func initialize() {
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
 	sneakerWorkers.InitWorkers()
+	initializers.LoadCacheData()
 
 	err := ioutil.WriteFile("pids/treat.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
 	if err != nil {

@@ -18,6 +18,8 @@ exchange:
   cancel:
     key: goDCE.order.cancel
     type: direct
+  fanout:
+    name: goDCE.fanout
 
 queue:
   matching:

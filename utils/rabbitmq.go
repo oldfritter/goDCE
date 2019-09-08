@@ -24,6 +24,7 @@ type Amqp struct {
 		Matching map[string]string `yaml:"matching"`
 		Trade    map[string]string `yaml:"trade"`
 		Cancel   map[string]string `yaml:"cancel"`
+		Fanout   map[string]string `yaml:"fanout"`
 	} `yaml:"exchange"`
 
 	Queue struct {

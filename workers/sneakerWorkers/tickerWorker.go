@@ -28,7 +28,7 @@ func buildTicker(marketId int) {
 
 	now := time.Now()
 	begin := now.Add(-time.Hour * 24)
-	ticker := Ticker{MarketId: marketId, Name: market.Name, Code: market.Code}
+	ticker := Ticker{MarketId: marketId, Name: market.Name}
 	mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, now).Select("min(price) as low").Scan(&ticker.TickerAspect)
 	mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, now).Select("max(price) as high").Scan(&ticker.TickerAspect)
 	mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, now).Select("last(price) as last").Scan(&ticker.TickerAspect)

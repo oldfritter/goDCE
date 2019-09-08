@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	envConfig "github.com/oldfritter/goDCE/config"
+	"github.com/oldfritter/goDCE/initializers"
 	"github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/trade/matching"
 	"github.com/oldfritter/goDCE/utils"
@@ -20,6 +21,7 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
+	initializers.DeleteListeQueue()
 	closeResource()
 }
 
@@ -30,6 +32,7 @@ func initialize() {
 	models.AutoMigrations()
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
+	initializers.LoadCacheData()
 
 	err := ioutil.WriteFile("pids/matching.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
 	if err != nil {

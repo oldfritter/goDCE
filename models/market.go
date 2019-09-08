@@ -39,6 +39,12 @@ type Market struct {
 	Running         bool   `json:"-" sql:"-"`
 }
 
+var Markets []Market
+
+func InitAllMarkets(db *utils.GormDB) {
+	db.Where("visible = ?", true).Find(&Markets)
+}
+
 // Exchange
 func (assignment *Market) MatchingExchange() string {
 	return utils.AmqpGlobalConfig.Exchange.Matching["key"]
