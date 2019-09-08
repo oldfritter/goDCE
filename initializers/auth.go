@@ -20,6 +20,7 @@ type ApiInterface struct {
 	CheckTimestamp        bool   `yaml:"check_timestamp"`
 	LimitTrafficWithIp    bool   `yaml:"limit_traffic_with_ip"`
 	LimitTrafficWithEmail bool   `yaml:"limit_traffic_with_email"`
+	IsRabbitMqConnected   bool   `yaml:"is_rabbitmq_connected"`
 }
 
 var GlobalApiInterfaces []ApiInterface
@@ -78,6 +79,9 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		if currentApiInterface.CheckTimestamp && checkTimestamp(context, &params) == false {
 			return utils.BuildError("3050")
+		}
+		if currentApiInterface.IsRabbitMqConnected && !IsRabbitMqConnected() {
+			return utils.BuildError("2046")
 		}
 
 		db := utils.MainDbBegin()

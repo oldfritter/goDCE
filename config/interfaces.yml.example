@@ -44,12 +44,14 @@
   method: POST
   reloading_matching_check: true
   market_can_trade: true
+  is_rabbitmq_connected: true
 - path: /api/:platform/v1/orders/multi2
   method: POST
   auth: true
   sign: true
   reloading_matching_check: true
   market_can_trade: true
+  is_rabbitmq_connected: true
 - path: /api/:platform/v1/order/delete
   auth: true
   sign: true
