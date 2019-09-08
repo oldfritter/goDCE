@@ -45,6 +45,10 @@ func InitAllMarkets(db *utils.GormDB) {
 	db.Where("visible = ?", true).Find(&Markets)
 }
 
+func FindAllMarket() []Market {
+	return Markets
+}
+
 // Exchange
 func (assignment *Market) MatchingExchange() string {
 	return utils.AmqpGlobalConfig.Exchange.Matching["key"]

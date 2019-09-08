@@ -16,6 +16,8 @@ type Env struct {
 		AppName    string `yaml:"app_name"`
 		LicenseKey string `yaml:"license_key"`
 	} `yaml:"newrelic"`
+
+	Schedules []string `yaml:"schedules"`
 }
 
 var CurrentEnv Env

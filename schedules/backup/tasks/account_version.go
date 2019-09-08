@@ -1,20 +1,14 @@
-package backup
+package tasks
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 )
 
 func BackupAccountVersions() {
-	config.InitEnv()
-	utils.InitMainDB()
-	utils.InitBackupDB()
-	AutoMigrations()
-
 	mainDB := utils.MainDbBegin()
 	defer mainDB.DbRollback()
 	var first, last AccountVersion
@@ -58,10 +52,6 @@ func BackupAccountVersions() {
 	<-quit
 	fmt.Println("quiting...")
 	time.Sleep(10 * time.Second)
-	// defer close(c)
-	// defer close(quit)
-	utils.CloseMainDB()
-	utils.CloseBackupDB()
 	return
 
 }

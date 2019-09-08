@@ -46,7 +46,7 @@ func (worker *Worker) SubscribeMessageByQueue(arguments amqp.Table) error {
 	if err != nil {
 		fmt.Errorf("Channel: %s", err)
 	}
-
+	channel.QueueDeclare((*worker).Queue, (*worker).Durable, false, false, false, arguments)
 	if (*worker).Exchange != "" && (*worker).RoutingKey != "" {
 		channel.ExchangeDeclare((*worker).Exchange, "topic", (*worker).Durable, false, false, false, nil)
 		channel.QueueBind((*worker).Queue, (*worker).RoutingKey, (*worker).Exchange, false, nil)
