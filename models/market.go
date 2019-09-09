@@ -94,17 +94,6 @@ func (assignment *Market) OrderCancelQueue() string {
 	return assignment.OrderCancelExchange() + "." + assignment.Code
 }
 
-// LogFilePath
-func (assignment *Market) MatchingLogFilePath() string {
-	return "logs/matching-" + assignment.Code + ".log"
-}
-func (assignment *Market) TradeTreatLogFilePath() string {
-	return "logs/trade-" + assignment.Code + ".log"
-}
-func (assignment *Market) OrderCancelLogFilePath() string {
-	return "logs/order-cancel-" + assignment.Code + ".log"
-}
-
 func (market *Market) LatestTradesRedisKey() string {
 	return fmt.Sprintf("goDCE:latestTrades:%v", market.Code)
 }
