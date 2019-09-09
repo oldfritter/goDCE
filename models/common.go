@@ -53,8 +53,8 @@ func AutoMigrations() {
 	mainDB.Model(&Identity{}).AddIndex("identity_idx0", "source", "symbol")
 
 	// k
-	mainDB.AutoMigrate(&KLine{})
-	mainDB.Model(&KLine{}).AddUniqueIndex("k_line_idx0", "market_id", "period", "timestamp")
+	backupDB.AutoMigrate(&KLine{})
+	backupDB.Model(&KLine{}).AddUniqueIndex("k_line_idx0", "market_id", "period", "timestamp")
 
 	// market
 	mainDB.AutoMigrate(&Market{})

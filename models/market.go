@@ -49,6 +49,16 @@ func FindAllMarket() []Market {
 	return Markets
 }
 
+func FindMarketById(id int) (Market, error) {
+	for _, market := range Markets {
+		if market.Id == id {
+			return market, nil
+		}
+	}
+	var market Market
+	return market, fmt.Errorf("No market can be found.")
+}
+
 // Exchange
 func (assignment *Market) MatchingExchange() string {
 	return utils.AmqpGlobalConfig.Exchange.Matching["key"]
