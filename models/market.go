@@ -1,8 +1,10 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 
+	"github.com/jinzhu/gorm"
 	"github.com/oldfritter/goDCE/utils"
 	"github.com/shopspring/decimal"
 )
@@ -57,6 +59,17 @@ func FindMarketById(id int) (Market, error) {
 	}
 	var market Market
 	return market, fmt.Errorf("No market can be found.")
+}
+
+func (market *Market) AfterCreate(db *gorm.DB) {
+	tickerRedis := utils.GetRedisConn("ticker")
+	defer tickerRedis.Close()
+	ticker := Ticker{MarketId: market.Id, Name: market.Name}
+	b, _ := json.Marshal(ticker)
+	if _, err := tickerRedis.Do("HSET", TickersRedisKey, market.Id, string(b)); err != nil {
+		fmt.Println("{ error: ", err, "}")
+		return
+	}
 }
 
 // Exchange
