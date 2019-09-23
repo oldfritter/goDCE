@@ -25,7 +25,7 @@ func main() {
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
 
-	initializers.InitCacheData()
+	initializers.LoadCacheData()
 
 	InitSchedule()
 
@@ -34,37 +34,14 @@ func main() {
 		fmt.Println(err)
 	}
 
-	go func() {
-		channel, err := utils.RabbitMqConnect.Channel()
-		if err != nil {
-			fmt.Errorf("Channel: %s", err)
-		}
-		channel.ExchangeDeclare("panama.fanout", "fanout", true, false, false, false, nil)
-		queue, err := channel.QueueDeclare("", true, false, false, false, nil)
-		if err != nil {
-			return
-		}
-		QueueName = queue.Name
-		channel.QueueBind(queue.Name, QueueName, "panama.fanout", false, nil)
-		msgs, _ := channel.Consume(queue.Name, "", true, false, false, false, nil)
-		for _ = range msgs {
-			initializers.InitCacheData()
-		}
-		return
-	}()
-
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-	channel, err := utils.RabbitMqConnect.Channel()
-	if err != nil {
-		fmt.Errorf("Channel: %s", err)
-	}
-	channel.QueueDelete(QueueName, false, false, false)
 	closeResource()
 }
 
 func closeResource() {
+	initializers.DeleteListeQueue()
 	utils.CloseAmqpConnection()
 	utils.CloseRedisPools()
 	utils.CloseMainDB()

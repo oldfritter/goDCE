@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	envConfig "github.com/oldfritter/goDCE/config"
+	"github.com/oldfritter/goDCE/initializers"
 	"github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 	"github.com/oldfritter/goDCE/workers/sneakerWorkers"
@@ -33,6 +34,7 @@ func initialize() {
 	models.AutoMigrations()
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
+	initializers.LoadCacheData()
 
 	err := ioutil.WriteFile("pids/workers.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
 	if err != nil {
@@ -41,6 +43,7 @@ func initialize() {
 }
 
 func closeResource() {
+	initializers.DeleteListeQueue()
 	utils.CloseAmqpConnection()
 	utils.CloseRedisPools()
 	utils.CloseMainDB()
