@@ -62,6 +62,11 @@ type Account struct {
 
 func (account *Account) AfterSave(db *gorm.DB) {}
 
+func (account *Account) Amount() (amount decimal.Decimal) {
+	amount = account.Balance.Add(account.Locked)
+	return
+}
+
 func (account *Account) PlusFunds(db *utils.GormDB, amount, fee decimal.Decimal, reason, modifiableId int, modifiableType string) (err error) {
 	if amount.LessThan(decimal.Zero) || fee.GreaterThan(amount) {
 		err = fmt.Errorf("cannot add funds (amount: %v)", amount)
@@ -179,7 +184,7 @@ func (account *Account) after(db *utils.GormDB, fun int, amount decimal.Decimal,
 		"fun":             strconv.Itoa(fun),
 		"fee":             fee.String(),
 		"reason":          strconv.Itoa(reason),
-		"amount":          amount.String(),
+		"amount":          account.Amount().String(),
 		"currency_id":     strconv.Itoa(account.CurrencyId),
 		"user_id":         strconv.Itoa(account.UserId),
 		"account_id":      strconv.Itoa(account.Id),
