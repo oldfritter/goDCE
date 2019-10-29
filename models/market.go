@@ -61,6 +61,16 @@ func FindMarketById(id int) (Market, error) {
 	return market, fmt.Errorf("No market can be found.")
 }
 
+func FindMarketByCode(code string) (Market, error) {
+	for _, market := range Markets {
+		if market.Code == code {
+			return market, nil
+		}
+	}
+	var market Market
+	return market, fmt.Errorf("No market can be found.")
+}
+
 func (market *Market) AfterCreate(db *gorm.DB) {
 	tickerRedis := utils.GetRedisConn("ticker")
 	defer tickerRedis.Close()
@@ -100,7 +110,7 @@ func (market *Market) LatestTradesRedisKey() string {
 func (market *Market) TickerRedisKey() string {
 	return "goDCE:ticker:" + market.Code
 }
-func (market *Market) KLineRedisKey(period int) string {
+func (market *Market) KLineRedisKey(period int64) string {
 	return fmt.Sprintf("goDCE:k:%v:%v", market.Id, period)
 }
 

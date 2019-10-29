@@ -28,10 +28,8 @@ type chart struct {
 }
 
 func V1GetK(context echo.Context) error {
-	var market Market
-	mainDB := utils.MainDbBegin()
-	defer mainDB.DbRollback()
-	if mainDB.Where("code = ?", context.QueryParam("market")).First(&market).RecordNotFound() {
+	market, err := FindMarketByCode(context.QueryParam("market"))
+	if err != nil {
 		return utils.BuildError("1021")
 	}
 	limit := 100
@@ -41,73 +39,57 @@ func V1GetK(context echo.Context) error {
 			limit = 10000
 		}
 	}
-	period := 1
-	periodstr, _ := strconv.Atoi(context.QueryParam("period"))
-	periods := []int{1, 5, 15, 30, 60, 120, 240, 360, 720, 1440, 4320, 10080}
-	periodBool := false
-	for _, per := range periods {
-		if periodstr == per {
-			periodBool = true
-			period = per
-		}
-	}
-	if !periodBool {
+	period, _ := strconv.ParseInt(context.QueryParam("period"), 10, 64)
+	if period == 0 {
 		return utils.BuildError("1053")
 	}
-
-	kRedis := utils.GetRedisConn("k")
-	defer kRedis.Close()
-
-	var timestamp int
+	var timestamp int64
 	if context.QueryParam("timestamp") == "" {
-		timestamp = int(time.Now().Unix())
+		timestamp = time.Now().Unix()
 	} else {
-		timestamp, _ = strconv.Atoi(context.QueryParam("timestamp"))
+		timestamp, _ = strconv.ParseInt(context.QueryParam("timestamp"), 10, 64)
 	}
-	minTimestamp := timestamp - period*60*limit
-
-	values, _ := redis.Values(
-		kRedis.Do(
-			"ZREVRANGEBYSCORE",
-			market.KLineRedisKey(period),
-			timestamp,
-			minTimestamp,
-		),
-	)
-
-	var result []interface{}
-	for _, value := range values {
-		var item []string
-		json.Unmarshal(value.([]byte), &item)
-		result = append(result, item)
+	kRedis := utils.GetRedisConn("data")
+	defer kRedis.Close()
+	values, _ := redis.Values(kRedis.Do("ZREVRANGEBYSCORE", market.KLineRedisKey(period), timestamp, 0, "limit", 0, limit, "withscores"))
+	var line []KLine
+	var k KLine
+	for i, value := range values {
+		if i%2 == 0 {
+			json.Unmarshal(value.([]byte), &k)
+		} else {
+			k.Timestamp, _ = strconv.ParseInt(string(value.([]byte)), 10, 64)
+			line = append(line, k)
+		}
 	}
 	response := utils.SuccessResponse
-	response.Body = result
+	response.Body = line
 	return context.JSON(http.StatusOK, response)
 }
 
 func V1GetChart(context echo.Context) error {
-	var market Market
-	mainDB := utils.MainDbBegin()
-	defer mainDB.DbRollback()
-	if mainDB.Where("code = ?", context.QueryParam("market")).First(&market).RecordNotFound() {
+	market, err := FindMarketByCode(context.QueryParam("market"))
+	if err != nil {
 		return utils.BuildError("1021")
 	}
 	kRedis := utils.GetRedisConn("k")
 	defer kRedis.Close()
 	limit := 100
-	timestamp := int(time.Now().Unix())
+	timestamp := time.Now().Unix()
 
 	var c chart
-	periods := []int{1, 5, 15, 30, 60, 120, 240, 360, 720, 1440, 4320, 10080}
+	periods := []int64{1, 5, 15, 30, 60, 120, 240, 360, 720, 1440, 4320, 10080}
 	for _, period := range periods {
-		minTimestamp := timestamp - period*60*limit
+
 		values, _ := redis.Values(
 			kRedis.Do(
 				"ZREVRANGEBYSCORE",
 				market.KLineRedisKey(period),
 				timestamp,
-				minTimestamp,
+				0,
+				"limit",
+				0,
+				limit,
 			),
 		)
 		var items []interface{}
