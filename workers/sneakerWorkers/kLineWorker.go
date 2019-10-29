@@ -73,6 +73,7 @@ func calculateInDB(marketId int, period, begin, end int64) (k KLine) {
 	}
 	backupDB.Save(&k)
 	backupDB.DbCommit()
+	synToRedis(&k)
 	return
 }
 
@@ -102,6 +103,7 @@ func calculateInBackupDB(marketId int, period, begin, end int64) (k KLine) {
 	backupDB.Model(KLine{}).Where("market_id = ?", marketId).Where("period = ?", lastPeriod).Where("? <= timestamp AND timestamp < ?", begin, end).Order("timestamp DESC").Limit(1).Select("close as close").Scan(&k)
 	backupDB.Save(&k)
 	backupDB.DbCommit()
+	synToRedis(&k)
 	return
 }
 
@@ -147,4 +149,14 @@ func synFromRedis(marketId int, period, begin, end int64) (k KLine) {
 		backupDB.DbCommit()
 	}
 	return
+}
+
+func synToRedis(k *KLine) {
+	kRedis := utils.GetRedisConn("k")
+	defer kRedis.Close()
+
+	b, _ := json.Marshal((*k).Data())
+	kRedis.Send("ZREMRANGEBYSCORE", (*k).RedisKey(), (*k).Timestamp)
+	kRedis.Do("ZADD", k.RedisKey(), (*k).Timestamp, string(b))
+
 }

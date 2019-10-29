@@ -20,7 +20,7 @@ func (worker *Worker) RebuildKLineToRedisWorker(payloadJson *[]byte) (queueName 
 	if mainDB.Where("market_id = ?", payload.MarketId).Where("period = ?", payload.Period).Find(&ks).RecordNotFound() {
 		return
 	}
-
+	mainDB.DbRollback()
 	kRedis := utils.GetRedisConn("k")
 	defer kRedis.Close()
 	for i, k := range ks {
