@@ -2,6 +2,10 @@
   success_code:
     '1000': Success.
   error_code:
+    '1021': 没有匹配的market。
+
+    '1053': 无效的 period.
+
     '3020': No record can be found.
     '3021': 暂不开放用户注册。
     '3022': 下单失败。
