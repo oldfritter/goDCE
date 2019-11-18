@@ -16,6 +16,11 @@
                                                                        
 ```
 
+## Dependencies
+* MySql
+* RabbitMQ
+* Redis
+
 # Install Golang
 ```
 wget https://dl.google.com/go/go1.11.2.linux-amd64.tar.gz
