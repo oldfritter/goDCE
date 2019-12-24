@@ -39,7 +39,7 @@ source ~/.bashrc
 
 # 获取代码
 ```
-go get github.com/oldfitter/goDCE
+go get github.com/oldfritter/goDCE
 ```
 # 安装依赖
 ```
