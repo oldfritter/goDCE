@@ -26,8 +26,11 @@ go get -u github.com/qor/i18n
 go get -u github.com/shopspring/decimal
 go get -u github.com/streadway/amqp
 
-go get -u golang.org/x/crypto
-go get -u golang.org/x/sys/unix
+go get -u github.com/golang/crypto
+go get -u github.com/golang/sys/unix
 
 go get -u gopkg.in/yaml.v2
 # godep save
+
+mkdir -p $GOPATH/src/golang.org/x/
+ln -s $GOPATH/src/github.com/golang $GOPATH/src/golang.org/x
