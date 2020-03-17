@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/qiniu/api.v7/auth/qbox"
@@ -51,6 +50,5 @@ func UploadFileToQiniu(bucket, key, filePath string) error {
 	if err != nil {
 		return err
 	}
-	exec.Command("sh", "-c", "rm -rf "+filePath).Output()
 	return nil
 }

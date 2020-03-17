@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -59,7 +58,6 @@ func AddFileToS3(s *session.Session, bucket, key, filePath string) error {
 	if err != nil {
 		return err
 	} else {
-		exec.Command("sh", "-c", "rm -rf "+filePath).Output()
 		return nil
 	}
 }
