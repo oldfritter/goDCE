@@ -8,7 +8,7 @@ import (
 	"github.com/oldfritter/goDCE/utils"
 )
 
-func (worker *Worker) RebuildKLineToRedisWorker(payloadJson *[]byte) (queueName string, message []byte) {
+func (worker Worker) RebuildKLineToRedisWorker(payloadJson *[]byte) (queueName string, message []byte) {
 	var payload struct {
 		MarketId int `json:"market_id"`
 		Period   int `json:"period"`

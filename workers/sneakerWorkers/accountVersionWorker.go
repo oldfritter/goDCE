@@ -8,7 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func (worker *Worker) AccountVersionCheckPointWorker(payloadJson *[]byte) (queueName string, message []byte) {
+func (worker Worker) AccountVersionCheckPointWorker(payloadJson *[]byte) (queueName string, message []byte) {
 	var payload struct {
 		AccountId string `json:"account_id"`
 	}

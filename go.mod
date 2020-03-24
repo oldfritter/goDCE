@@ -18,6 +18,7 @@ require (
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/newrelic/go-agent v3.4.0+incompatible // indirect
+	github.com/oldfritter/sneaker-go v0.0.0-20200313032517-0409eddc53a8 // indirect
 	github.com/qiniu/api.v7 v7.2.5+incompatible
 	github.com/qiniu/x v7.0.8+incompatible // indirect
 	github.com/qor/admin v0.0.0-20200315024928-877b98a68a6f // indirect

@@ -7,12 +7,15 @@ import (
 	"os/signal"
 	"strconv"
 
+	sneaker "github.com/oldfritter/sneaker-go"
+	sneakerUtils "github.com/oldfritter/sneaker-go/utils"
+	"github.com/streadway/amqp"
+
 	envConfig "github.com/oldfritter/goDCE/config"
 	"github.com/oldfritter/goDCE/initializers"
 	"github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 	"github.com/oldfritter/goDCE/workers/sneakerWorkers"
-	"github.com/streadway/amqp"
 )
 
 func main() {
@@ -35,6 +38,7 @@ func initialize() {
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
 	initializers.LoadCacheData()
+	sneakerUtils.InitializeAmqpConfig()
 
 	err := ioutil.WriteFile("pids/workers.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
 	if err != nil {
@@ -56,9 +60,9 @@ func initWorkers() {
 
 func StartAllWorkers() {
 	for _, w := range sneakerWorkers.AllWorkers {
-		for i := 0; i < w.Threads; i++ {
+		for i := 0; i < w.GetThreads(); i++ {
 			go func(w sneakerWorkers.Worker) {
-				w.SubscribeMessageByQueue(amqp.Table{})
+				sneaker.SubscribeMessageByQueue(w, amqp.Table{})
 			}(w)
 		}
 	}

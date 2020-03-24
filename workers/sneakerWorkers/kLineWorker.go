@@ -11,7 +11,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func (worker *Worker) KLineWorker(payloadJson *[]byte) (queueName string, message []byte) {
+func (worker Worker) KLineWorker(payloadJson *[]byte) (queueName string, message []byte) {
 	start := time.Now().UnixNano()
 	var payload struct {
 		MarketId   int    `json:"market_id"`
