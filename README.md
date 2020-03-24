@@ -23,9 +23,9 @@
 
 # Install Golang
 ```
-wget https://dl.google.com/go/go1.11.2.linux-amd64.tar.gz
+wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz
 
-sudo tar zxvf go1.11.2.linux-amd64.tar.gz -C /usr/local
+sudo tar zxvf go1.13.linux-amd64.tar.gz -C /usr/local
 
 vim ~/.bashrc
 添加
