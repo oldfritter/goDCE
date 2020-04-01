@@ -13,6 +13,7 @@ import (
 	newrelic "github.com/dafiti/echo-middleware"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+
 	envConfig "github.com/oldfritter/goDCE/config"
 	"github.com/oldfritter/goDCE/initializers"
 	"github.com/oldfritter/goDCE/models"
@@ -51,7 +52,6 @@ func main() {
 	<-quit
 	fmt.Println("accepted signal")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	initializers.DeleteListeQueue()
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
 		fmt.Println("shutting down failed, err:" + err.Error())

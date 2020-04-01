@@ -21,7 +21,6 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-	initializers.DeleteListeQueue()
 	closeResource()
 }
 

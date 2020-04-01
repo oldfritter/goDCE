@@ -47,7 +47,6 @@ func initialize() {
 }
 
 func closeResource() {
-	initializers.DeleteListeQueue()
 	utils.CloseAmqpConnection()
 	utils.CloseRedisPools()
 	utils.CloseMainDB()

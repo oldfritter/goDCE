@@ -7,8 +7,6 @@ import (
 	"github.com/oldfritter/goDCE/utils"
 )
 
-var QueueName string
-
 func InitCacheData() {
 	db := utils.MainDbBegin()
 	defer db.DbRollback()
@@ -23,26 +21,16 @@ func LoadCacheData() {
 			fmt.Errorf("Channel: %s", err)
 		}
 		channel.ExchangeDeclare(utils.AmqpGlobalConfig.Exchange.Fanout["name"], "fanout", true, false, false, false, nil)
-		queue, err := channel.QueueDeclare("", true, false, false, false, nil)
+		queue, err := channel.QueueDeclare("", true, true, false, false, nil)
 		if err != nil {
 			return
 		}
-		QueueName = queue.Name
-		channel.QueueBind(queue.Name, QueueName, utils.AmqpGlobalConfig.Exchange.Fanout["name"], false, nil)
-		msgs, _ := channel.Consume(queue.Name, "", true, false, false, false, nil)
+		channel.QueueBind(queue.Name, queue.Name, utils.AmqpGlobalConfig.Exchange.Fanout["name"], false, nil)
+		msgs, _ := channel.Consume(queue.Name, "", true, true, false, false, nil)
 		for _ = range msgs {
 			InitCacheData()
 		}
 		return
 	}()
-
-}
-
-func DeleteListeQueue() {
-	channel, err := utils.RabbitMqConnect.Channel()
-	if err != nil {
-		fmt.Errorf("Channel: %s", err)
-	}
-	channel.QueueDelete(QueueName, false, false, false)
 
 }
