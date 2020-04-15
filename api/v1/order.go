@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo"
 	. "github.com/oldfritter/goDCE/models"
@@ -153,74 +152,6 @@ func V1PostOrders(context echo.Context) error {
 
 }
 
-type OrderAttr struct {
-	Side             string          `json:"side"`
-	NewClientOrderId string          `json:"new_client_order_id"`
-	OrderType        string          `json:"order_type"`
-	Price            decimal.Decimal `json:"price"`
-	Volume           decimal.Decimal `json:"volume"`
-}
-
-func V1PostOrdersMulti(context echo.Context) error {
-	params := context.Get("params").(map[string]string)
-	user := context.Get("current_user").(User)
-	var market Market
-	mainDB := utils.MainDbBegin()
-	defer mainDB.DbRollback()
-	if mainDB.Where("name = ?", params["market"]).First(&market).RecordNotFound() {
-		return utils.BuildError("1021")
-	}
-	var orderAttrs []OrderAttr
-	json.Unmarshal([]byte(strings.Replace(params["orders"], `\"`, `"`, -1)), &orderAttrs)
-	orders := make([]interface{}, len(orderAttrs))
-
-	response := utils.SuccessResponse
-
-	for i, orderAttr := range orderAttrs {
-		var orderType string
-		locked := orderAttr.Volume
-		price, volume := orderAttr.Price.Truncate(int32(market.BidFixed)), orderAttr.Volume.Truncate(int32(market.AskFixed))
-		if price.LessThanOrEqual(decimal.Zero) {
-			return utils.BuildError("1024")
-		}
-		if volume.LessThanOrEqual(decimal.Zero) {
-			return utils.BuildError("1023")
-		}
-		if orderAttr.Side == "buy" {
-			locked = orderAttr.Volume.Mul(orderAttr.Price)
-			orderType = "OrderBid"
-		} else if orderAttr.Side == "sell" {
-			orderType = "OrderAsk"
-		} else {
-			return utils.BuildError("1022")
-		}
-		order := Order{
-			Source:       context.Param("platform") + "-APIv1",
-			State:        WAIT,
-			UserId:       user.Id,
-			MarketId:     market.Id,
-			Volume:       volume,
-			OriginVolume: volume,
-			Price:        price,
-			OrderType:    "limit",
-			Type:         orderType,
-			Locked:       locked,
-			OriginLocked: locked,
-		}
-		err := tryToChangeAccount(context, &order, &market, orderAttr.Side, user.Id, 2)
-		if err == nil {
-			pushMessageToMatching(&order, &market, "submit")
-			orders[i] = order
-		} else {
-			response = utils.BuildError("3022")
-			response.Body = orders
-			return response
-		}
-	}
-	response.Body = orders
-	return context.JSON(http.StatusOK, response)
-}
-
 func V1PostOrderDelete(context echo.Context) error {
 	params := context.Get("params").(map[string]string)
 	user := context.Get("current_user").(User)
@@ -233,26 +164,6 @@ func V1PostOrderDelete(context echo.Context) error {
 	pushMessageToMatching(&order, &order.Market, "cancel")
 	response := utils.SuccessResponse
 	response.Body = order
-	return context.JSON(http.StatusOK, response)
-}
-
-func V1PostOrdersDelete(context echo.Context) error {
-	params := context.Get("params").(map[string]string)
-	user := context.Get("current_user").(User)
-	ids := strings.Split(params["ids"], ",")
-	mainDB := utils.MainDbBegin()
-	defer mainDB.DbRollback()
-	var orders []Order
-	if mainDB.Where("id in (?) AND user_id = ?", ids, user.Id).Find(&orders).RecordNotFound() {
-		return utils.BuildError("2004")
-	}
-	for _, order := range orders {
-		if order.State == 100 {
-			pushMessageToMatching(&order, &order.Market, "cancel")
-		}
-	}
-	response := utils.SuccessResponse
-	response.Body = orders
 	return context.JSON(http.StatusOK, response)
 }
 

@@ -18,8 +18,8 @@ type OrderCurrency struct {
 
 type Market struct {
 	CommonModel
-	Name            string          `gorm:"type:varchar(16)"`
-	Code            string          `gorm:"type:varchar(16)"`
+	Name            string          `json:"name"" gorm:"type:varchar(16)"`
+	Code            string          `json:"code" gorm:"type:varchar(16)"`
 	PriceGroupFixed int             `json:"price_group_fixed"`
 	SortOrder       int             `json:"sort_order"`
 	AskCurrencyId   int             `json:"ask_currency_id"`
