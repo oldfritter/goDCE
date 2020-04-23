@@ -1,14 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/signal"
 	"strconv"
 
 	sneaker "github.com/oldfritter/sneaker-go"
-	sneakerUtils "github.com/oldfritter/sneaker-go/utils"
 	"github.com/streadway/amqp"
 
 	envConfig "github.com/oldfritter/goDCE/config"
@@ -38,16 +37,17 @@ func initialize() {
 	utils.InitRedisPools()
 	utils.InitializeAmqpConfig()
 	initializers.LoadCacheData()
-	sneakerUtils.InitializeAmqpConfig()
+	initializers.InitializeAmqpConfig()
 
+	setLog()
 	err := ioutil.WriteFile("pids/workers.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 
 func closeResource() {
-	utils.CloseAmqpConnection()
+	initializers.CloseAmqpConnection()
 	utils.CloseRedisPools()
 	utils.CloseMainDB()
 	utils.CloseBackupDB()
@@ -61,8 +61,24 @@ func StartAllWorkers() {
 	for _, w := range sneakerWorkers.AllWorkers {
 		for i := 0; i < w.GetThreads(); i++ {
 			go func(w sneakerWorkers.Worker) {
-				sneaker.SubscribeMessageByQueue(w, amqp.Table{})
+				sneaker.SubscribeMessageByQueue(initializers.RabbitMqConnect.Connection, w, amqp.Table{})
 			}(w)
 		}
 	}
+}
+
+func setLog() {
+	err := os.Mkdir("logs", 0755)
+	if err != nil {
+		if !os.IsExist(err) {
+			log.Fatalf("create folder error: %v", err)
+		}
+	}
+
+	file, err := os.OpenFile("logs/workers.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatalf("open file error: %v", err)
+	}
+	log.SetOutput(file)
+
 }
