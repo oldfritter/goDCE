@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo"
+	"github.com/oldfritter/goDCE/initializers"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 	"github.com/shopspring/decimal"
@@ -212,8 +213,8 @@ func pushMessageToMatching(order *Order, market *Market, option string) {
 		fmt.Println("error:", err)
 	}
 
-	err = utils.PublishMessageWithRouteKey(
-		utils.AmqpGlobalConfig.Exchange.Matching["key"],
+	err = initializers.PublishMessageWithRouteKey(
+		initializers.AmqpGlobalConfig.Exchange["matching"]["key"],
 		market.Code, "text/plain",
 		&b,
 		amqp.Table{},

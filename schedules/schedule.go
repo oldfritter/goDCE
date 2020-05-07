@@ -23,7 +23,7 @@ func main() {
 	utils.InitMainDB()
 	utils.InitBackupDB()
 	utils.InitRedisPools()
-	utils.InitializeAmqpConfig()
+	initializers.InitializeAmqpConfig()
 
 	initializers.LoadCacheData()
 
@@ -41,7 +41,7 @@ func main() {
 }
 
 func closeResource() {
-	utils.CloseAmqpConnection()
+	initializers.CloseAmqpConnection()
 	utils.CloseRedisPools()
 	utils.CloseMainDB()
 	utils.CloseBackupDB()

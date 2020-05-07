@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	envConfig "github.com/oldfritter/goDCE/config"
+	"github.com/oldfritter/goDCE/initializers"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 	"github.com/oldfritter/matching"
@@ -56,7 +57,7 @@ func InitAssignments() {
 }
 
 func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
-	channel, err := utils.RabbitMqConnect.Channel()
+	channel, err := initializers.RabbitMqConnect.Channel()
 	if err != nil {
 		fmt.Errorf("Channel: %s", err)
 	}
@@ -65,7 +66,7 @@ func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
 
 	go func(id int) {
 		a := Assignments[id]
-		channel, err := utils.RabbitMqConnect.Channel()
+		channel, err := initializers.RabbitMqConnect.Channel()
 		if err != nil {
 			fmt.Errorf("Channel: %s", err)
 		}
@@ -101,7 +102,7 @@ func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
 			if err != nil {
 				fmt.Println("error:", err)
 			}
-			err = utils.PublishMessageWithRouteKey((*assignment).TradeTreatExchange(), (*assignment).Code, "text/plain", &b, amqp.Table{}, amqp.Persistent)
+			err = initializers.PublishMessageWithRouteKey((*assignment).TradeTreatExchange(), (*assignment).Code, "text/plain", &b, amqp.Table{}, amqp.Persistent)
 			if err != nil {
 				fmt.Println("{ error:", err, "}")
 			} else {
@@ -118,7 +119,7 @@ func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
 			if err != nil {
 				fmt.Println("error:", err)
 			}
-			err = utils.PublishMessageWithRouteKey((*assignment).OrderCancelExchange(), (*assignment).Code, "text/plain", &b, amqp.Table{}, amqp.Persistent)
+			err = initializers.PublishMessageWithRouteKey((*assignment).OrderCancelExchange(), (*assignment).Code, "text/plain", &b, amqp.Table{}, amqp.Persistent)
 			if err != nil {
 				fmt.Println("{ error:", err, "}")
 			} else {
@@ -131,12 +132,12 @@ func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
 }
 
 func SubscribeReload() (err error) {
-	channel, err := utils.RabbitMqConnect.Channel()
+	channel, err := initializers.RabbitMqConnect.Channel()
 	if err != nil {
 		fmt.Errorf("Channel: %s", err)
 		return
 	}
-	channel.ExchangeDeclare(utils.AmqpGlobalConfig.Exchange.Default["key"], "topic", true, false, false, false, nil)
-	channel.QueueBind(utils.AmqpGlobalConfig.Queue.Matching["reload"], utils.AmqpGlobalConfig.Queue.Matching["reload"], utils.AmqpGlobalConfig.Exchange.Default["key"], false, nil)
+	channel.ExchangeDeclare(initializers.AmqpGlobalConfig.Exchange["default"]["key"], "topic", true, false, false, false, nil)
+	channel.QueueBind(initializers.AmqpGlobalConfig.Queue["matching"]["reload"], initializers.AmqpGlobalConfig.Queue["matching"]["reload"], initializers.AmqpGlobalConfig.Exchange["default"]["key"], false, nil)
 	return
 }

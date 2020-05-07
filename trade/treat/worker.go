@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/oldfritter/goDCE/initializers"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 	"github.com/oldfritter/goDCE/workers/sneakerWorkers"
@@ -83,7 +84,7 @@ func pushMessageToRefreshTicker(marketId int) {
 			routingKey = w.RoutingKey
 		}
 	}
-	err = utils.PublishMessageWithRouteKey(exchange, routingKey, "text/plain", &b, amqp.Table{}, amqp.Persistent)
+	err = initializers.PublishMessageWithRouteKey(exchange, routingKey, "text/plain", &b, amqp.Table{}, amqp.Persistent)
 	if err != nil {
 		fmt.Println("{ error:", err, "}")
 		panic(err)
@@ -112,7 +113,7 @@ func pushMessageToRefreshKLine(marketId int) {
 		if err != nil {
 			fmt.Println("error:", err)
 		}
-		err = utils.PublishMessageWithRouteKey(exchange, routingKey, "text/plain", &b, amqp.Table{}, amqp.Persistent)
+		err = initializers.PublishMessageWithRouteKey(exchange, routingKey, "text/plain", &b, amqp.Table{}, amqp.Persistent)
 		if err != nil {
 			fmt.Println("{ error:", err, "}")
 			return

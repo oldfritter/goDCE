@@ -106,7 +106,7 @@ func checkTimestamp(context echo.Context, params *map[string]string) bool {
 }
 
 func IsRabbitMqConnected() bool {
-	c := utils.RabbitMqConnect
+	c := RabbitMqConnect
 	ok := true
 	if c.IsClosed() {
 		fmt.Println("Connection state: closed")

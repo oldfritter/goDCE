@@ -75,7 +75,7 @@ func initialize() {
 	utils.InitBackupDB()
 	models.AutoMigrations()
 	utils.InitRedisPools()
-	utils.InitializeAmqpConfig()
+	initializers.InitializeAmqpConfig()
 
 	initializers.LoadInterfaces()
 	initializers.InitI18n()
@@ -88,7 +88,7 @@ func initialize() {
 }
 
 func closeResource() {
-	utils.CloseAmqpConnection()
+	initializers.CloseAmqpConnection()
 	utils.CloseRedisPools()
 	utils.CloseMainDB()
 }

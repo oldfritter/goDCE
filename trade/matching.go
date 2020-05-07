@@ -30,7 +30,7 @@ func initialize() {
 	utils.InitBackupDB()
 	models.AutoMigrations()
 	utils.InitRedisPools()
-	utils.InitializeAmqpConfig()
+	initializers.InitializeAmqpConfig()
 	initializers.LoadCacheData()
 
 	err := ioutil.WriteFile("pids/matching.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
@@ -40,7 +40,7 @@ func initialize() {
 }
 
 func closeResource() {
-	utils.CloseAmqpConnection()
+	initializers.CloseAmqpConnection()
 	utils.CloseRedisPools()
 	utils.CloseMainDB()
 }
@@ -50,11 +50,11 @@ func initAssignments() {
 	matching.SubscribeReload()
 
 	go func() {
-		channel, err := utils.RabbitMqConnect.Channel()
+		channel, err := initializers.RabbitMqConnect.Channel()
 		if err != nil {
 			fmt.Errorf("Channel: %s", err)
 		}
-		queueName := utils.AmqpGlobalConfig.Queue.Matching["reload"]
+		queueName := initializers.AmqpGlobalConfig.Queue["matching"]["reload"]
 		queue, err := channel.QueueDeclare(queueName, true, false, false, false, nil)
 		if err != nil {
 			return

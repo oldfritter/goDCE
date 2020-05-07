@@ -39,6 +39,10 @@ type Market struct {
 	TradeTreatNode  string `json:"-" gorm:"default:'a'; type:varchar(11)"`
 	OrderCancelNode string `json:"-" gorm:"default:'a'; type:varchar(11)"`
 	Running         bool   `json:"-" sql:"-"`
+
+	Matching    string `json:"-"`
+	TradeTreat  string `json:"-"`
+	OrderCancel string `json:"-"`
 }
 
 var Markets []Market
@@ -84,13 +88,13 @@ func (market *Market) AfterCreate(db *gorm.DB) {
 
 // Exchange
 func (assignment *Market) MatchingExchange() string {
-	return utils.AmqpGlobalConfig.Exchange.Matching["key"]
+	return assignment.Matching
 }
 func (assignment *Market) TradeTreatExchange() string {
-	return utils.AmqpGlobalConfig.Exchange.Trade["key"]
+	return assignment.TradeTreat
 }
 func (assignment *Market) OrderCancelExchange() string {
-	return utils.AmqpGlobalConfig.Exchange.Cancel["key"]
+	return assignment.OrderCancel
 }
 
 // Queue

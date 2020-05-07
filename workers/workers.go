@@ -35,7 +35,7 @@ func initialize() {
 	utils.InitBackupDB()
 	models.AutoMigrations()
 	utils.InitRedisPools()
-	utils.InitializeAmqpConfig()
+	initializers.InitializeAmqpConfig()
 	initializers.LoadCacheData()
 	initializers.InitializeAmqpConfig()
 

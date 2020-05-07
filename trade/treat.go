@@ -31,7 +31,7 @@ func initialize() {
 	utils.InitBackupDB()
 	models.AutoMigrations()
 	utils.InitRedisPools()
-	utils.InitializeAmqpConfig()
+	initializers.InitializeAmqpConfig()
 	sneakerWorkers.InitWorkers()
 	initializers.LoadCacheData()
 
@@ -42,7 +42,7 @@ func initialize() {
 }
 
 func closeResource() {
-	utils.CloseAmqpConnection()
+	initializers.CloseAmqpConnection()
 	utils.CloseRedisPools()
 	utils.CloseMainDB()
 }
@@ -52,11 +52,11 @@ func initAssignments() {
 	treat.SubscribeReload()
 
 	go func() {
-		channel, err := utils.RabbitMqConnect.Channel()
+		channel, err := initializers.RabbitMqConnect.Channel()
 		if err != nil {
 			fmt.Errorf("Channel: %s", err)
 		}
-		queueName := utils.AmqpGlobalConfig.Queue.Trade["reload"]
+		queueName := initializers.AmqpGlobalConfig.Queue["trade"]["reload"]
 		queue, err := channel.QueueDeclare(queueName, true, false, false, false, nil)
 		if err != nil {
 			return

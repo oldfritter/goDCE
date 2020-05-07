@@ -31,7 +31,7 @@ func CreateLatestKLine() {
 			if err != nil {
 				fmt.Println("error:", err)
 			}
-			err = utils.PublishMessageWithRouteKey("goDCE.default", "goDCE.k", "text/plain", &b, amqp.Table{}, amqp.Persistent)
+			err = initializers.PublishMessageWithRouteKey("goDCE.default", "goDCE.k", "text/plain", &b, amqp.Table{}, amqp.Persistent)
 			if err != nil {
 				fmt.Println("{ error:", err, "}")
 				panic(err)

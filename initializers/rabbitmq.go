@@ -1,6 +1,7 @@
 package initializers
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -9,6 +10,8 @@ import (
 	"github.com/oldfritter/sneaker-go/utils"
 	"github.com/streadway/amqp"
 	"gopkg.in/yaml.v2"
+
+	. "github.com/oldfritter/goDCE/models"
 )
 
 type Amqp struct {
@@ -21,6 +24,7 @@ type Amqp struct {
 	} `yaml:"connect"`
 
 	Exchange map[string]map[string]string `yaml:"exchange"`
+	Queue    map[string]map[string]string `yaml:"queue"`
 }
 
 var (
@@ -41,6 +45,7 @@ func InitializeAmqpConfig() {
 		return
 	}
 	InitializeAmqpConnection()
+	initMarkets()
 }
 
 func InitializeAmqpConnection() {
@@ -64,4 +69,64 @@ func CloseAmqpConnection() {
 
 func GetRabbitMqConnect() utils.RabbitMqConnect {
 	return RabbitMqConnect
+}
+
+func initMarkets() {
+	for i, _ := range Markets {
+		Markets[i].Matching = AmqpGlobalConfig.Exchange["matching"]["key"]
+		Markets[i].TradeTreat = AmqpGlobalConfig.Exchange["trade"]["key"]
+		Markets[i].OrderCancel = AmqpGlobalConfig.Exchange["cancel"]["key"]
+	}
+}
+
+func PublishMessageWithRouteKey(exchange, routeKey, contentType string, message *[]byte, arguments amqp.Table, deliveryMode uint8) error {
+	channel, err := RabbitMqConnect.Channel()
+	defer channel.Close()
+	if err != nil {
+		return fmt.Errorf("Channel: %s", err)
+	}
+	if err = channel.Publish(
+		exchange, // publish to an exchange
+		routeKey, // routing to 0 or more queues
+		false,    // mandatory
+		false,    // immediate
+		amqp.Publishing{
+			Headers:         amqp.Table{},
+			ContentType:     contentType,
+			ContentEncoding: "",
+			Body:            *message,
+			DeliveryMode:    deliveryMode, // amqp.Persistent, amqp.Transient // 1=non-persistent, 2=persistent
+			Priority:        0,            // 0-9
+			// a bunch of application/implementation-specific fields
+		},
+	); err != nil {
+		return fmt.Errorf("Queue Publish: %s", err)
+	}
+	return nil
+}
+
+func PublishMessageToQueue(queue, contentType string, message *[]byte, arguments amqp.Table, deliveryMode uint8) error {
+	channel, err := RabbitMqConnect.Channel()
+	defer channel.Close()
+	if err != nil {
+		return fmt.Errorf("Channel: %s", err)
+	}
+	if err = channel.Publish(
+		"",    // publish to an exchange
+		queue, // routing to 0 or more queues
+		false, // mandatory
+		false, // immediate
+		amqp.Publishing{
+			Headers:         amqp.Table{},
+			ContentType:     contentType,
+			ContentEncoding: "",
+			Body:            *message,
+			DeliveryMode:    deliveryMode, // amqp.Persistent, amqp.Transient // 1=non-persistent, 2=persistent
+			Priority:        0,            // 0-9
+			// a bunch of application/implementation-specific fields
+		},
+	); err != nil {
+		return fmt.Errorf("Queue Publish: %s", err)
+	}
+	return nil
 }
