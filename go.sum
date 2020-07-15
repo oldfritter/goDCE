@@ -60,8 +60,10 @@ github.com/microcosm-cc/bluemonday v1.0.2/go.mod h1:iVP4YcDBq+n/5fb23BhYFvIMq/le
 github.com/newrelic/go-agent v3.4.0+incompatible h1:GhUhNLDdR3ETfUVJAN/czXlqRTcgbPs6U02jYhf15rg=
 github.com/newrelic/go-agent v3.4.0+incompatible/go.mod h1:a8Fv1b/fYhFSReoTU6HDkTYIMZeSVNffmoS726Y0LzQ=
 github.com/oldfritter/matching v0.0.0-20190827024937-efdf83ea2ab0/go.mod h1:qtjPJJjsQnSacfr0tDIkqP91I69DFJKwY/0EBlwVumA=
-github.com/oldfritter/sneaker-go v1.0.6 h1:cz8PgNZ9cJ6OouFTIvRDdXFvC0v92NL7FXwY3ZepD/c=
-github.com/oldfritter/sneaker-go v1.0.6/go.mod h1:q9+KC43OfLklfiKffi11et1HpMufAyD5q3mI/cdpOHw=
+github.com/oldfritter/sneaker-go v1.1.0 h1:J5bXkAx73eVylAgqM+4x8oNdoHKmAHK9IRmTyNJtRnU=
+github.com/oldfritter/sneaker-go/v2 v2.0.8 h1:GAQ1QyI/XDg3SK6hfhRoY684zsVzVGldgc4gPFah2fk=
+github.com/oldfritter/sneaker-go/v2 v2.0.8/go.mod h1:bryvrz4puhkiLZVVZFVC/VcPmZbPHC5mq9o7UKTJoj4=
+github.com/oldfritter/sneaker-go/v2 v2.1.1 h1:o130Ma1FUUpqgc9ti/Ks2wea1w5oB1iXpAFgWBNu96A=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/qiniu/api.v7/v7 v7.5.0 h1:DY6NrIp6FZ1GP4Roc9hRnO2m+OLzASYNnvz5Mbgw1rk=

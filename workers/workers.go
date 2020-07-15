@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"strconv"
 
-	sneaker "github.com/oldfritter/sneaker-go"
+	sneaker "github.com/oldfritter/sneaker-go/v2"
 	"github.com/streadway/amqp"
 
 	envConfig "github.com/oldfritter/goDCE/config"
