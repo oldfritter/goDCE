@@ -45,14 +45,6 @@ func ordersPerMarket(db *utils.GormDB, market *Market) {
 		}
 		fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "--WaitingOrderCheck orders: ", ids)
 	}
-	// for _, order := range orders {
-	//     if order.CreatedAt.Before(time.Now().Add(-time.Hour * 24)) {
-	//         order.State = 0
-	//         db.Save(&order)
-	//     } else {
-	//         order.PushMessageToMatching("submit")
-	//     }
-	// }
 	if !db.Where("id not in (?)", orderBook.BidIds).
 		Where("type = ?", "OrderBid").
 		Where("market_id = ?", (*market).Code).
@@ -65,12 +57,4 @@ func ordersPerMarket(db *utils.GormDB, market *Market) {
 		}
 		fmt.Println(time.Now().Format("2006-01-02 15:04:05"), "--WaitingOrderCheck orders: ", ids)
 	}
-	// for _, order := range orders {
-	//     if order.CreatedAt.Before(time.Now().Add(-time.Hour * 24)) {
-	//         order.State = 0
-	//         db.Save(&order)
-	//     } else {
-	//         order.PushMessageToMatching("submit")
-	//     }
-	// }
 }

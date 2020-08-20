@@ -4,11 +4,27 @@ import (
 	"encoding/json"
 	"fmt"
 
+	sneaker "github.com/oldfritter/sneaker-go/v3"
+
+	"github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 )
 
-func (worker Worker) RebuildKLineToRedisWorker(payloadJson *[]byte) (queueName string, message []byte) {
+func InitializeRebuildKLineToRedisWorker() {
+	for _, w := range config.AllWorkers {
+		if w.Name == "RebuildKLineToRedisWorker" {
+			config.AllWorkerIs = append(config.AllWorkerIs, &RebuildKLineToRedisWorker{w})
+			return
+		}
+	}
+}
+
+type RebuildKLineToRedisWorker struct {
+	sneaker.Worker
+}
+
+func (worker *RebuildKLineToRedisWorker) Work(payloadJson *[]byte) (err error) {
 	var payload struct {
 		MarketId int `json:"market_id"`
 		Period   int `json:"period"`

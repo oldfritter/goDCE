@@ -5,11 +5,27 @@ import (
 	"fmt"
 	"time"
 
+	sneaker "github.com/oldfritter/sneaker-go/v3"
+
+	"github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 )
 
-func (worker Worker) TickerWorker(payloadJson *[]byte) (queueName string, message []byte) {
+func InitializeTickerWorker() {
+	for _, w := range config.AllWorkers {
+		if w.Name == "TickerWorker" {
+			config.AllWorkerIs = append(config.AllWorkerIs, &TickerWorker{w})
+			return
+		}
+	}
+}
+
+type TickerWorker struct {
+	sneaker.Worker
+}
+
+func (worker *TickerWorker) Work(payloadJson *[]byte) (err error) {
 	var payload struct {
 		MarketId int `json:"market_id"`
 	}

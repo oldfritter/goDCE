@@ -10,6 +10,8 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo"
+
+	"github.com/oldfritter/goDCE/config"
 	"github.com/oldfritter/goDCE/initializers/locale"
 	"github.com/oldfritter/goDCE/utils"
 )
@@ -106,7 +108,7 @@ func checkTimestamp(context echo.Context, params *map[string]string) bool {
 }
 
 func IsRabbitMqConnected() bool {
-	c := RabbitMqConnect
+	c := config.RabbitMqConnect
 	ok := true
 	if c.IsClosed() {
 		fmt.Println("Connection state: closed")

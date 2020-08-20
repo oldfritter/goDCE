@@ -12,7 +12,6 @@ import (
 	"github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/trade/treat"
 	"github.com/oldfritter/goDCE/utils"
-	"github.com/oldfritter/goDCE/workers/sneakerWorkers"
 )
 
 func main() {
@@ -32,7 +31,7 @@ func initialize() {
 	models.AutoMigrations()
 	utils.InitRedisPools()
 	initializers.InitializeAmqpConfig()
-	sneakerWorkers.InitWorkers()
+	initializers.InitWorkers()
 	initializers.LoadCacheData()
 
 	err := ioutil.WriteFile("pids/treat.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
@@ -52,11 +51,11 @@ func initAssignments() {
 	treat.SubscribeReload()
 
 	go func() {
-		channel, err := initializers.RabbitMqConnect.Channel()
+		channel, err := envConfig.RabbitMqConnect.Channel()
 		if err != nil {
 			fmt.Errorf("Channel: %s", err)
 		}
-		queueName := initializers.AmqpGlobalConfig.Queue["trade"]["reload"]
+		queueName := envConfig.AmqpGlobalConfig.Queue["trade"]["reload"]
 		queue, err := channel.QueueDeclare(queueName, true, false, false, false, nil)
 		if err != nil {
 			return

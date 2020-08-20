@@ -50,11 +50,11 @@ func initAssignments() {
 	matching.SubscribeReload()
 
 	go func() {
-		channel, err := initializers.RabbitMqConnect.Channel()
+		channel, err := envConfig.RabbitMqConnect.Channel()
 		if err != nil {
 			fmt.Errorf("Channel: %s", err)
 		}
-		queueName := initializers.AmqpGlobalConfig.Queue["matching"]["reload"]
+		queueName := envConfig.AmqpGlobalConfig.Queue["matching"]["reload"]
 		queue, err := channel.QueueDeclare(queueName, true, false, false, false, nil)
 		if err != nil {
 			return

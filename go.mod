@@ -24,7 +24,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/newrelic/go-agent v3.4.0+incompatible // indirect
 	github.com/oldfritter/matching v0.0.0-20190827024937-efdf83ea2ab0
-	github.com/oldfritter/sneaker-go/v2 v2.0.8
+	github.com/oldfritter/sneaker-go/v3 v3.0.2
 	github.com/qiniu/api.v7/v7 v7.5.0
 	github.com/qor/admin v0.0.0-20200315024928-877b98a68a6f // indirect
 	github.com/qor/assetfs v0.0.0-20170713023933-ff57fdc13a14 // indirect

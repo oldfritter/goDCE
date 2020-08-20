@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	envConfig "github.com/oldfritter/goDCE/config"
-	"github.com/oldfritter/goDCE/initializers"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
 	"github.com/streadway/amqp"
@@ -42,7 +41,7 @@ func InitAssignments() {
 }
 
 func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
-	channel, err := initializers.RabbitMqConnect.Channel()
+	channel, err := envConfig.RabbitMqConnect.Channel()
 	if err != nil {
 		fmt.Errorf("Channel: %s", err)
 	}
@@ -52,7 +51,7 @@ func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
 
 	go func(id int) {
 		a := Assignments[id]
-		channel, err := initializers.RabbitMqConnect.Channel()
+		channel, err := envConfig.RabbitMqConnect.Channel()
 		if err != nil {
 			fmt.Errorf("Channel: %s", err)
 		}
@@ -76,12 +75,12 @@ func subscribeMessageByQueue(assignment *Market, arguments amqp.Table) error {
 }
 
 func SubscribeReload() (err error) {
-	channel, err := initializers.RabbitMqConnect.Channel()
+	channel, err := envConfig.RabbitMqConnect.Channel()
 	if err != nil {
 		fmt.Errorf("Channel: %s", err)
 		return
 	}
-	channel.ExchangeDeclare(initializers.AmqpGlobalConfig.Exchange["default"]["key"], "topic", true, false, false, false, nil)
-	channel.QueueBind(initializers.AmqpGlobalConfig.Queue["trade"]["reload"], initializers.AmqpGlobalConfig.Queue["trade"]["reload"], initializers.AmqpGlobalConfig.Exchange["default"]["key"], false, nil)
+	channel.ExchangeDeclare(envConfig.AmqpGlobalConfig.Exchange["default"]["key"], "topic", true, false, false, false, nil)
+	channel.QueueBind(envConfig.AmqpGlobalConfig.Queue["trade"]["reload"], envConfig.AmqpGlobalConfig.Queue["trade"]["reload"], envConfig.AmqpGlobalConfig.Exchange["default"]["key"], false, nil)
 	return
 }

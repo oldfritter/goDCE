@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/oldfritter/goDCE/initializers"
+	"github.com/streadway/amqp"
+
+	"github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
-	"github.com/oldfritter/goDCE/workers/sneakerWorkers"
 	"github.com/oldfritter/matching"
-	"github.com/streadway/amqp"
 )
 
 func Treat(payloadJson *[]byte) {
@@ -78,13 +78,13 @@ func pushMessageToRefreshTicker(marketId int) {
 	}
 
 	var exchange, routingKey string
-	for _, w := range sneakerWorkers.AllWorkers {
+	for _, w := range config.AllWorkers {
 		if w.Name == "TickerWorker" {
 			exchange = w.Exchange
 			routingKey = w.RoutingKey
 		}
 	}
-	err = initializers.PublishMessageWithRouteKey(exchange, routingKey, "text/plain", &b, amqp.Table{}, amqp.Persistent)
+	err = config.RabbitMqConnect.PublishMessageWithRouteKey(exchange, routingKey, "text/plain", false, false, &b, amqp.Table{}, amqp.Persistent, "")
 	if err != nil {
 		fmt.Println("{ error:", err, "}")
 		panic(err)
@@ -101,7 +101,7 @@ func pushMessageToRefreshKLine(marketId int) {
 	payload.MarketId = marketId
 	payload.Timestamp = time.Now().Unix()
 	var exchange, routingKey string
-	for _, w := range sneakerWorkers.AllWorkers {
+	for _, w := range config.AllWorkers {
 		if w.Name == "KLineWorker" {
 			exchange = w.Exchange
 			routingKey = w.RoutingKey
@@ -113,7 +113,7 @@ func pushMessageToRefreshKLine(marketId int) {
 		if err != nil {
 			fmt.Println("error:", err)
 		}
-		err = initializers.PublishMessageWithRouteKey(exchange, routingKey, "text/plain", &b, amqp.Table{}, amqp.Persistent)
+		err = config.RabbitMqConnect.PublishMessageWithRouteKey(exchange, routingKey, "text/plain", false, false, &b, amqp.Table{}, amqp.Persistent, "")
 		if err != nil {
 			fmt.Println("{ error:", err, "}")
 			return

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	. "github.com/oldfritter/goDCE/models"
-	"github.com/oldfritter/goDCE/utils"
 	"github.com/streadway/amqp"
+
+	"github.com/oldfritter/goDCE/config"
+	. "github.com/oldfritter/goDCE/models"
 )
 
 func CreateLatestKLine() {
@@ -31,7 +32,7 @@ func CreateLatestKLine() {
 			if err != nil {
 				fmt.Println("error:", err)
 			}
-			err = initializers.PublishMessageWithRouteKey("goDCE.default", "goDCE.k", "text/plain", &b, amqp.Table{}, amqp.Persistent)
+			err = config.RabbitMqConnect.PublishMessageWithRouteKey("goDCE.default", "goDCE.k", "text/plain", false, false, &b, amqp.Table{}, amqp.Persistent, "")
 			if err != nil {
 				fmt.Println("{ error:", err, "}")
 				panic(err)

@@ -3,19 +3,34 @@ package sneakerWorkers
 import (
 	"encoding/json"
 
-	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
+	sneaker "github.com/oldfritter/sneaker-go/v3"
 	"github.com/shopspring/decimal"
+
+	"github.com/oldfritter/goDCE/config"
+	. "github.com/oldfritter/goDCE/models"
 )
 
-func (worker Worker) AccountVersionCheckPointWorker(payloadJson *[]byte) (queueName string, message []byte) {
+func InitializeAccountVersionCheckPointWorker() {
+	for _, w := range config.AllWorkers {
+		if w.Name == "AccountVersionCheckPointWorker" {
+			config.AllWorkerIs = append(config.AllWorkerIs, &AccountVersionCheckPointWorker{w})
+			return
+		}
+	}
+}
+
+type AccountVersionCheckPointWorker struct {
+	sneaker.Worker
+}
+
+func (worker *AccountVersionCheckPointWorker) Work(payloadJson *[]byte) (err error) {
 	var payload struct {
 		AccountId string `json:"account_id"`
 	}
 	json.Unmarshal([]byte(*payloadJson), &payload)
 
-	db := utils.MainDbBegin()
-	defer db.DbRollback()
+	db := utils.MainDb
 	var account Account
 	if db.Where("id = ?", payload.AccountId).First(&account).RecordNotFound() {
 		return

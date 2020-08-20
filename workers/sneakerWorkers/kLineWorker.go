@@ -6,12 +6,28 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+	sneaker "github.com/oldfritter/sneaker-go/v3"
+	"github.com/shopspring/decimal"
+
+	"github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
-	"github.com/shopspring/decimal"
 )
 
-func (worker Worker) KLineWorker(payloadJson *[]byte) (queueName string, message []byte) {
+func InitializeKLineWorker() {
+	for _, w := range config.AllWorkers {
+		if w.Name == "KLineWorker" {
+			config.AllWorkerIs = append(config.AllWorkerIs, &KLineWorker{w})
+			return
+		}
+	}
+}
+
+type KLineWorker struct {
+	sneaker.Worker
+}
+
+func (worker *KLineWorker) Work(payloadJson *[]byte) (err error) {
 	start := time.Now().UnixNano()
 	var payload struct {
 		MarketId   int    `json:"market_id"`

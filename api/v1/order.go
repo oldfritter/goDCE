@@ -7,11 +7,12 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo"
-	"github.com/oldfritter/goDCE/initializers"
-	. "github.com/oldfritter/goDCE/models"
-	"github.com/oldfritter/goDCE/utils"
 	"github.com/shopspring/decimal"
 	"github.com/streadway/amqp"
+
+	envConfig "github.com/oldfritter/goDCE/config"
+	. "github.com/oldfritter/goDCE/models"
+	"github.com/oldfritter/goDCE/utils"
 )
 
 func V1GetOrder(context echo.Context) error {
@@ -213,12 +214,15 @@ func pushMessageToMatching(order *Order, market *Market, option string) {
 		fmt.Println("error:", err)
 	}
 
-	err = initializers.PublishMessageWithRouteKey(
-		initializers.AmqpGlobalConfig.Exchange["matching"]["key"],
+	err = envConfig.RabbitMqConnect.PublishMessageWithRouteKey(
+		envConfig.AmqpGlobalConfig.Exchange["matching"]["key"],
 		market.Code, "text/plain",
+		false,
+		false,
 		&b,
 		amqp.Table{},
 		amqp.Persistent,
+		"",
 	)
 	if err != nil {
 		fmt.Println("{ error:", err, "}")

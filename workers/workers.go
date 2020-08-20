@@ -7,14 +7,12 @@ import (
 	"os/signal"
 	"strconv"
 
-	sneaker "github.com/oldfritter/sneaker-go/v2"
-	"github.com/streadway/amqp"
+	sneaker "github.com/oldfritter/sneaker-go/v3"
 
 	envConfig "github.com/oldfritter/goDCE/config"
 	"github.com/oldfritter/goDCE/initializers"
 	"github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
-	"github.com/oldfritter/goDCE/workers/sneakerWorkers"
 )
 
 func main() {
@@ -54,14 +52,15 @@ func closeResource() {
 }
 
 func initWorkers() {
-	sneakerWorkers.InitWorkers()
+	initializers.InitWorkers()
 }
 
 func StartAllWorkers() {
-	for _, w := range sneakerWorkers.AllWorkers {
+	for _, w := range envConfig.AllWorkerIs {
 		for i := 0; i < w.GetThreads(); i++ {
-			go func(w sneakerWorkers.Worker) {
-				sneaker.SubscribeMessageByQueue(initializers.RabbitMqConnect.Connection, w, amqp.Table{})
+			go func(w sneaker.WorkerI) {
+				w.InitLogger()
+				sneaker.SubscribeMessageByQueue(envConfig.RabbitMqConnect.Connection, w, nil)
 			}(w)
 		}
 	}
