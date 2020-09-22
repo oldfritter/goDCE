@@ -14,7 +14,7 @@ func WaitingOrderCheck() {
 	db := utils.MainDbBegin()
 	defer db.DbRollback()
 
-	for _, market := range Markets {
+	for _, market := range AllMarkets {
 		ordersPerMarket(db, &market)
 	}
 	db.DbCommit()

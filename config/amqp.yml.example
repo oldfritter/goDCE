@@ -19,7 +19,9 @@ exchange:
     key: goDCE.order.cancel
     type: direct
   fanout:
-    name: goDCE.fanout
+    default: goDCE.fanout
+    k: goDCE.fanout.notify.k
+    ticker: goDCE.fanout.notify.ticker
 
 queue:
   matching:

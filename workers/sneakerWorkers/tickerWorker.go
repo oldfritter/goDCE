@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	sneaker "github.com/oldfritter/sneaker-go/v3"
-
+	"github.com/gomodule/redigo/redis"
 	"github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
+	sneaker "github.com/oldfritter/sneaker-go/v3"
+	"github.com/streadway/amqp"
 )
 
 func InitializeTickerWorker() {
@@ -35,29 +36,45 @@ func (worker *TickerWorker) Work(payloadJson *[]byte) (err error) {
 }
 
 func buildTicker(marketId int) {
-	mainDB := utils.MainDbBegin()
-	defer mainDB.DbRollback()
-	var market Market
-	if mainDB.Where("id = ?", marketId).First(&market).RecordNotFound() {
-		return
+	market, err := FindMarketById(marketId)
+	if err != nil {
+		fmt.Println("error:", err)
 	}
+	dataRedis := utils.GetRedisConn("data")
+	defer dataRedis.Close()
+	ticker := refreshTicker(dataRedis, &market)
+	t, err := json.Marshal(ticker)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	err = config.RabbitMqConnect.PublishMessageWithRouteKey(config.AmqpGlobalConfig.Exchange["fanout"]["ticker"], "#", "text/plain", false, false, &t, amqp.Table{}, amqp.Persistent, "")
+	if err != nil {
+		fmt.Println("{ error:", err, "}")
+	}
+	dataRedis.Do("SET", market.TickerRedisKey(), string(t))
 
+}
+
+func refreshTicker(dataRedis redis.Conn, market *Market) (ticker Ticker) {
 	now := time.Now()
-	begin := now.Add(-time.Hour * 24)
-	ticker := Ticker{MarketId: marketId, Name: market.Name}
-	mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, now).Select("min(price) as low").Scan(&ticker.TickerAspect)
-	mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, now).Select("max(price) as high").Scan(&ticker.TickerAspect)
-	mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, now).Select("last(price) as last").Scan(&ticker.TickerAspect)
-	mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, now).Select("sum(volume) as volume").Scan(&ticker.TickerAspect)
-	mainDB.Model(Trade{}).Order("id ASC").Where("market_id = ?", marketId).Where("? <= created_at AND created_at < ?", begin, now).Select("first(price) as open").Scan(&ticker.TickerAspect)
-	mainDB.Model(Order{}).Where("state = ?", 100).Where("type = ?", "OrderBid").Where("market_id = ?", marketId).Select("max(price) as buy").Scan(&ticker.TickerAspect)
-	mainDB.Model(Order{}).Where("state = ?", 100).Where("type = ?", "OrderAsk").Where("market_id = ?", marketId).Select("min(price) as sell").Scan(&ticker.TickerAspect)
-
-	tickerRedis := utils.GetRedisConn("ticker")
-	defer tickerRedis.Close()
-	b, _ := json.Marshal(ticker)
-	if _, err := tickerRedis.Do("HSET", TickersRedisKey, marketId, string(b)); err != nil {
-		fmt.Println(err)
-		return
+	ticker.MarketId = (*market).Id
+	ticker.At = now.Unix()
+	ticker.Name = (*market).Name
+	kJsons, _ := redis.Values(dataRedis.Do("ZRANGEBYSCORE", (*market).KLineRedisKey(1), now.Add(-time.Hour*24).Unix(), now.Unix()))
+	var k KLine
+	for i, kJson := range kJsons {
+		json.Unmarshal(kJson.([]byte), &k)
+		if i == 0 {
+			ticker.TickerAspect.Open = k.Open
+		}
+		ticker.TickerAspect.Last = k.Close
+		if ticker.TickerAspect.Low.IsZero() || ticker.TickerAspect.Low.GreaterThan(k.Low) {
+			ticker.TickerAspect.Low = k.Low
+		}
+		if ticker.TickerAspect.High.LessThan(k.High) {
+			ticker.TickerAspect.High = k.High
+		}
+		ticker.TickerAspect.Volume = ticker.TickerAspect.Volume.Add(k.Volume)
 	}
+	return
 }

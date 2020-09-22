@@ -43,6 +43,6 @@ func buildDepth(market *Market) {
 	dataRedis := utils.GetRedisConn("data")
 	defer dataRedis.Close()
 
-	dataRedis.Do((*market).AskRedisKey(), depth.AskOrders)
-	dataRedis.Do((*market).BidRedisKey(), depth.BidOrders)
+	dataRedis.Do("SET", (*market).AskRedisKey(), depth.AskOrders)
+	dataRedis.Do("SET", (*market).BidRedisKey(), depth.BidOrders)
 }
