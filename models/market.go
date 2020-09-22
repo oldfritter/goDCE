@@ -31,6 +31,10 @@ type Market struct {
 	Visible         bool            `json:"visible"`
 	Tradable        bool            `json:"tradable"`
 
+	// 暂存数据
+	Ticker       TickerAspect  `sql:"-" json:"ticker"`
+	LatestKLines map[int]KLine `sql:"-" json:"-"`
+
 	// 撮合相关属性
 	Ack             bool   `json:"-"`
 	Durable         bool   `json:"-"`
@@ -45,34 +49,32 @@ type Market struct {
 	OrderCancel string `json:"-"`
 }
 
-var Markets []Market
+var AllMarkets []Market
 
 func InitAllMarkets(db *utils.GormDB) {
-	db.Where("visible = ?", true).Find(&Markets)
+	db.Where("visible = ?", true).Find(&AllMarkets)
 }
 
 func FindAllMarket() []Market {
-	return Markets
+	return AllMarkets
 }
 
 func FindMarketById(id int) (Market, error) {
-	for _, market := range Markets {
+	for _, market := range AllMarkets {
 		if market.Id == id {
 			return market, nil
 		}
 	}
-	var market Market
-	return market, fmt.Errorf("No market can be found.")
+	return Market{}, fmt.Errorf("No market can be found.")
 }
 
 func FindMarketByCode(code string) (Market, error) {
-	for _, market := range Markets {
+	for _, market := range AllMarkets {
 		if market.Code == code {
 			return market, nil
 		}
 	}
-	var market Market
-	return market, fmt.Errorf("No market can be found.")
+	return Market{}, fmt.Errorf("No market can be found.")
 }
 
 func (market *Market) AfterCreate(db *gorm.DB) {
@@ -84,6 +86,10 @@ func (market *Market) AfterCreate(db *gorm.DB) {
 		fmt.Println("{ error: ", err, "}")
 		return
 	}
+}
+
+func (market *Market) AfterFind(db *gorm.DB) {
+	market.LatestKLines = make(map[int]KLine)
 }
 
 // Exchange
@@ -123,4 +129,12 @@ func (market *Market) AskRedisKey() string {
 }
 func (market *Market) BidRedisKey() string {
 	return fmt.Sprintf("goDCE:depth:%v:bid", market.Id)
+}
+
+// Notify
+func (market *Market) KLineNotify(period int64) string {
+	return "market:kLine:notify"
+}
+func (market *Market) TickerNotify() string {
+	return fmt.Sprintf("market:ticker:notify:%v", market.Id)
 }

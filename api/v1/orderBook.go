@@ -23,8 +23,8 @@ func V1Getdepth(context echo.Context) error {
 	var market Market
 	mainDB := utils.MainDbBegin()
 	defer mainDB.DbRollback()
-	tickerRedis := utils.GetRedisConn("ticker")
-	defer tickerRedis.Close()
+	dataRedis := utils.GetRedisConn("data")
+	defer dataRedis.Close()
 	if mainDB.Where("name = ?", context.QueryParam("market")).First(&market).RecordNotFound() {
 		return utils.BuildError("1021")
 	}
@@ -35,8 +35,8 @@ func V1Getdepth(context echo.Context) error {
 			limit = 300
 		}
 	}
-	vAsk, _ := redis.String(tickerRedis.Do("GET", market.AskRedisKey()))
-	vBid, _ := redis.String(tickerRedis.Do("GET", market.BidRedisKey()))
+	vAsk, _ := redis.String(dataRedis.Do("GET", market.AskRedisKey()))
+	vBid, _ := redis.String(dataRedis.Do("GET", market.BidRedisKey()))
 	if vAsk == "" || vBid == "" {
 		return utils.BuildError("1026")
 	}

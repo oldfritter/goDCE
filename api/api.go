@@ -52,6 +52,7 @@ func main() {
 	<-quit
 	fmt.Println("accepted signal")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
 		fmt.Println("shutting down failed, err:" + err.Error())
@@ -80,6 +81,8 @@ func initialize() {
 	initializers.LoadInterfaces()
 	initializers.InitI18n()
 	initializers.LoadCacheData()
+	initializers.LoadLatestKLines()
+	initializers.LoadLatestTickers()
 
 	err := ioutil.WriteFile("pids/api.pid", []byte(strconv.Itoa(os.Getpid())), 0644)
 	if err != nil {
