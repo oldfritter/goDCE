@@ -5,8 +5,9 @@ import (
 	"fmt"
 
 	"github.com/jinzhu/gorm"
-	"github.com/oldfritter/goDCE/utils"
 	"github.com/shopspring/decimal"
+
+	"github.com/oldfritter/goDCE/utils"
 )
 
 type OrderCurrency struct {
@@ -32,7 +33,7 @@ type Market struct {
 	Tradable        bool            `json:"tradable"`
 
 	// 暂存数据
-	Ticker       TickerAspect  `sql:"-" json:"ticker"`
+	Ticker       *TickerAspect `sql:"-" json:"ticker"`
 	LatestKLines map[int]KLine `sql:"-" json:"-"`
 
 	// 撮合相关属性

@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gomodule/redigo/redis"
+
 	"github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
+	"github.com/oldfritter/goDCE/utils"
 )
 
 func LoadLatestTickers() {
@@ -31,5 +34,21 @@ func LoadLatestTickers() {
 			}
 		}
 		return
+	}()
+
+	go func() {
+		tickerRedis := utils.GetRedisConn("ticker")
+		defer tickerRedis.Close()
+		for i, market := range AllMarkets {
+			jsonStr, err := redis.Bytes(tickerRedis.Do("GET", market.TickerRedisKey()))
+			if err != nil {
+				continue
+			}
+			var ticker Ticker
+			json.Unmarshal(jsonStr, &ticker)
+			if AllMarkets[i].Ticker == nil {
+				AllMarkets[i].Ticker = ticker.TickerAspect
+			}
+		}
 	}()
 }

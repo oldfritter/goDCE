@@ -19,8 +19,8 @@ type TickerAspect struct {
 }
 
 type Ticker struct {
-	MarketId     int          `json:"market_id"`
-	At           int64        `json:"at"`
-	Name         string       `json:"name"`
-	TickerAspect TickerAspect `json:"ticker"`
+	MarketId     int           `json:"market_id"`
+	At           int64         `json:"at"`
+	Name         string        `json:"name"`
+	TickerAspect *TickerAspect `json:"ticker"`
 }

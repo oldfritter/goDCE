@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+	sneaker "github.com/oldfritter/sneaker-go/v3"
+	"github.com/streadway/amqp"
+
 	"github.com/oldfritter/goDCE/config"
 	. "github.com/oldfritter/goDCE/models"
 	"github.com/oldfritter/goDCE/utils"
-	sneaker "github.com/oldfritter/sneaker-go/v3"
-	"github.com/streadway/amqp"
 )
 
 func InitializeTickerWorker() {
@@ -40,9 +41,7 @@ func buildTicker(marketId int) {
 	if err != nil {
 		fmt.Println("error:", err)
 	}
-	dataRedis := utils.GetRedisConn("data")
-	defer dataRedis.Close()
-	ticker := refreshTicker(dataRedis, &market)
+	ticker := refreshTicker(&market)
 	t, err := json.Marshal(ticker)
 	if err != nil {
 		fmt.Println("error:", err)
@@ -51,16 +50,19 @@ func buildTicker(marketId int) {
 	if err != nil {
 		fmt.Println("{ error:", err, "}")
 	}
-	dataRedis.Do("SET", market.TickerRedisKey(), string(t))
-
+	tickerRedis := utils.GetRedisConn("ticker")
+	defer tickerRedis.Close()
+	tickerRedis.Do("SET", market.TickerRedisKey(), string(t))
 }
 
-func refreshTicker(dataRedis redis.Conn, market *Market) (ticker Ticker) {
+func refreshTicker(market *Market) (ticker Ticker) {
+	klineRedis := utils.GetRedisConn("kline")
+	defer klineRedis.Close()
 	now := time.Now()
 	ticker.MarketId = (*market).Id
 	ticker.At = now.Unix()
 	ticker.Name = (*market).Name
-	kJsons, _ := redis.Values(dataRedis.Do("ZRANGEBYSCORE", (*market).KLineRedisKey(1), now.Add(-time.Hour*24).Unix(), now.Unix()))
+	kJsons, _ := redis.Values(klineRedis.Do("ZRANGEBYSCORE", (*market).KLineRedisKey(1), now.Add(-time.Hour*24).Unix(), now.Unix()))
 	var k KLine
 	for i, kJson := range kJsons {
 		json.Unmarshal(kJson.([]byte), &k)
