@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
-	github.com/aws/aws-sdk-go v1.29.30
+	github.com/aws/aws-sdk-go v1.33.0
 	github.com/dafiti/echo-middleware v0.0.0-20180423194757-e57a87d075ea
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
