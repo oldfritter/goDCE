@@ -48,6 +48,6 @@ require (
 	github.com/theplant/testingutils v0.0.0-20190603093022-26d8b4d95c61 // indirect
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	github.com/yosssi/gohtml v0.0.0-20200519115854-476f5b4b8047 // indirect
-	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59
+	golang.org/x/crypto v0.1.0
 	gopkg.in/yaml.v2 v2.2.8
 )
