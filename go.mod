@@ -21,7 +21,7 @@ require (
 	github.com/kylelemons/go-gypsy v0.0.0-20160905020020-08cad365cd28
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
-	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.20 // indirect
 	github.com/newrelic/go-agent v3.4.0+incompatible // indirect
 	github.com/oldfritter/matching v0.0.0-20190827024937-efdf83ea2ab0
 	github.com/oldfritter/sneaker-go/v3 v3.0.2
